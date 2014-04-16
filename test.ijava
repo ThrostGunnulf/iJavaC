@@ -1,0 +1,11 @@
+class teste
+{
+	static int manel;
+
+	public static void main(String []argv)
+	{
+		int zeca;
+		zeca = (new int[5])[2];
+	}
+}
+
