@@ -3,7 +3,7 @@
 
 void yyerror(char *s);
 
-extern int yylineno;
+extern int prevLineNo;
 extern int prevColNo;
 extern char *yytext;
 %}
@@ -109,4 +109,4 @@ int main()
     return 0;
 }
 
-void yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", yylineno, prevColNo, s, yytext);}
+void yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);}

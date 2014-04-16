@@ -1,22 +1,23 @@
 %{
-#define INITCOL 1
+#define INITCOL  1
+#define INITLINE 1
 
 #define YYSTYPE_IS_DECLARED
 #define YYSTYPE char*
 
 #include <string.h>
-#include "y.tab.h"
+#include "ijparser.tab.h"
 
 void colCount(int l);
 
 extern YYSTYPE yylval;
 
 int colNo = INITCOL;
-int prevColNo;
+int prevColNo = INITCOL;
+int lineNo = INITLINE;
+int prevLineNo = INITLINE;
 int lineScom = 0, colScom = 0;
 %}
-
-%option yylineno
 
 reserved        (abstract|assert|break|byte|case|catch|char|const|continue|default|do|double|enum|extends|final|finally|float|for|goto|implements|import|instanceof|interface|long|native|package|private|protected|short|strictfp|super|switch|synchronized|this|throw|throws|transient|try|volatile|null|"++"|"--")
 
@@ -31,12 +32,12 @@ dec             [0-9]
 <COMMENT><<EOF>>                        {BEGIN 0; printf("Line %d, col %d: unterminated comment\n", lineScom, colScom);}
 <COMMENT>"*/"                           {BEGIN 0; colCount(yyleng);}
 <COMMENT>.                              {colCount(yyleng);}
-<COMMENT>"\n"                           {prevColNo = colNo; colNo = INITCOL;}
+<COMMENT>"\n"                           {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
 "/*"                                    {BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colCount(yyleng);}
 "//".*                                  {prevColNo = colNo; colNo = INITCOL;}
 
 " "|"\t"                                {colCount(yyleng);}
-"\n"                                    {prevColNo = colNo; colNo = INITCOL;}
+"\n"                                    {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
 {reserved}                              {return RESERVED; yylval = strdup(yytext); colCount(yyleng);}
 
 "int"                                   {colCount(yyleng); return INT;}
@@ -65,12 +66,13 @@ dec             [0-9]
 {letter}{alphanumeric}*                 {colCount(yyleng); yylval = strdup(yytext); return ID;}
 {dec}+|"0x"{hex}+                       {colCount(yyleng); yylval = strdup(yytext); return INTLIT;}
 
-.                                       {printf("Line %d, col %d: illegal character ('%s')\n", yylineno, colNo, yytext); colNo++;}
+.                                       {printf("Line %d, col %d: illegal character ('%s')\n", lineNo, colNo, yytext); colNo++;}
 
 %%
 
 void colCount(int l)
 {
+	prevLineNo = lineNo;
 	prevColNo = colNo;
 	colNo += l;
 }
