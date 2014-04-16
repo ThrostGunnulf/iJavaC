@@ -7,9 +7,12 @@
 #include <string.h>
 #include "y.tab.h"
 
+void colCount(int l);
+
 extern YYSTYPE yylval;
 
 int colNo = INITCOL;
+int prevColNo;
 int lineScom = 0, colScom = 0;
 %}
 
@@ -26,45 +29,51 @@ dec             [0-9]
 
 %%
 <COMMENT><<EOF>>                        {BEGIN 0; printf("Line %d, col %d: unterminated comment\n", lineScom, colScom);}
-<COMMENT>"*/"                           {BEGIN 0; colNo += 2;}
-<COMMENT>.                              {colNo++;}
-<COMMENT>"\n"                           {colNo = INITCOL;}
-"/*"                                    {BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colNo += 2;}
-"//".*                                  {colNo = INITCOL;}
+<COMMENT>"*/"                           {BEGIN 0; colCount(yyleng);}
+<COMMENT>.                              {colCount(yyleng);}
+<COMMENT>"\n"                           {prevColNo = colNo; colNo = INITCOL;}
+"/*"                                    {BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colCount(yyleng);}
+"//".*                                  {prevColNo = colNo; colNo = INITCOL;}
 
-" "|"\t"                                {colNo++;}
-"\n"                                    {colNo = INITCOL;}
-{reserved}                              {return RESERVED; yylval = strdup(yytext); colNo += yyleng;}
+" "|"\t"                                {colCount(yyleng);}
+"\n"                                    {prevColNo = colNo; colNo = INITCOL;}
+{reserved}                              {return RESERVED; yylval = strdup(yytext); colCount(yyleng);}
 
-"int"                                   {colNo += yyleng; return INT;}
-"boolean"                               {colNo += yyleng; return BOOL;}
-"new"                                   {colNo += yyleng; return NEW;}
-"if"                                    {colNo += yyleng; return IF;}
-"else"                                  {colNo += yyleng; return ELSE;}
-"while"                                 {colNo += yyleng; return WHILE;}
-"System.out.println"                    {colNo += yyleng; return PRINT;}
-"Integer.parseInt"                      {colNo += yyleng; return PARSEINT;}
-"class"                                 {colNo += yyleng; return CLASS;}
-"public"                                {colNo += yyleng; return PUBLIC;}
-"static"                                {colNo += yyleng; return STATIC;}
-"void"                                  {colNo += yyleng; return VOID;}
-"String"                                {colNo += yyleng; return STRING;}
-".length"                               {colNo += yyleng; return DOTLENGTH;}
-"return"                                {colNo += yyleng; return RETURN;}
-"("|")"|"{"|"}"|"["|"]"|"!"|"="|";"|"," {colNo += yyleng; return yytext[0];}
-"&&"                                    {colNo += yyleng; return AND;}
-"||"                                    {colNo += yyleng; return OR;}
-"<"|">"|"<="|">="                       {colNo += yyleng; yylval = strdup(yytext); return RELCOMPAR;}
-"!="|"=="                               {colNo += yyleng; yylval = strdup(yytext); return EQUALITY;}
-"+"|"-"              					{colNo += yyleng; yylval = strdup(yytext); return ADDITIVE;}
-"*"|"/"|"%"								{colNo += yyleng; yylval = strdup(yytext); return MULTIPLIC;}
-"true"|"false"                          {colNo += yyleng; yylval = strdup(yytext); return BOOLLIT;}
-{letter}{alphanumeric}*                 {colNo += yyleng; yylval = strdup(yytext); return ID;}
-{dec}+|"0x"{hex}+                       {colNo += yyleng; yylval = strdup(yytext); return INTLIT;}
+"int"                                   {colCount(yyleng); return INT;}
+"boolean"                               {colCount(yyleng); return BOOL;}
+"new"                                   {colCount(yyleng); return NEW;}
+"if"                                    {colCount(yyleng); return IF;}
+"else"                                  {colCount(yyleng); return ELSE;}
+"while"                                 {colCount(yyleng); return WHILE;}
+"System.out.println"                    {colCount(yyleng); return PRINT;}
+"Integer.parseInt"                      {colCount(yyleng); return PARSEINT;}
+"class"                                 {colCount(yyleng); return CLASS;}
+"public"                                {colCount(yyleng); return PUBLIC;}
+"static"                                {colCount(yyleng); return STATIC;}
+"void"                                  {colCount(yyleng); return VOID;}
+"String"                                {colCount(yyleng); return STRING;}
+".length"                               {colCount(yyleng); return DOTLENGTH;}
+"return"                                {colCount(yyleng); return RETURN;}
+"("|")"|"{"|"}"|"["|"]"|"!"|"="|";"|"," {colCount(yyleng); return yytext[0];}
+"&&"                                    {colCount(yyleng); return AND;}
+"||"                                    {colCount(yyleng); return OR;}
+"<"|">"|"<="|">="                       {colCount(yyleng); yylval = strdup(yytext); return RELCOMPAR;}
+"!="|"=="                               {colCount(yyleng); yylval = strdup(yytext); return EQUALITY;}
+"+"|"-"              					{colCount(yyleng); yylval = strdup(yytext); return ADDITIVE;}
+"*"|"/"|"%"								{colCount(yyleng); yylval = strdup(yytext); return MULTIPLIC;}
+"true"|"false"                          {colCount(yyleng); yylval = strdup(yytext); return BOOLLIT;}
+{letter}{alphanumeric}*                 {colCount(yyleng); yylval = strdup(yytext); return ID;}
+{dec}+|"0x"{hex}+                       {colCount(yyleng); yylval = strdup(yytext); return INTLIT;}
 
 .                                       {printf("Line %d, col %d: illegal character ('%s')\n", yylineno, colNo, yytext); colNo++;}
 
 %%
+
+void colCount(int l)
+{
+	prevColNo = colNo;
+	colNo += l;
+}
 
 int yywrap()
 {
