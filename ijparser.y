@@ -2,6 +2,8 @@
 #include <stdio.h>
 
 void yyerror(char *s);
+
+extern int yylineno;
 %}
 
 %token INT BOOL NEW IF ELSE WHILE PRINT PARSEINT CLASS PUBLIC STATIC VOID STRING DOTLENGTH RETURN AND OR RELCOMPAR BOOLLIT ID INTLIT RESERVED EQUALITY ADDITIVE MULTIPLIC
@@ -101,7 +103,9 @@ argslist: ',' args                                                              
 
 int main()
 {
-    yyparse();    return 0;
+	printf("%d\n", yylineno);
+    yyparse();
+    return 0;
 }
 
 void yyerror(char *s) {printf("%s\n", s);}
