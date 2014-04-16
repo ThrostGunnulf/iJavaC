@@ -1,7 +1,7 @@
-lex ijscanner.l
-bison -v -d ijparser.y
-gcc -o ijparser lex.yy.c y.tab.c -ll -Wall
+flex ijscanner.l
+bison -d ijparser.y
+gcc -o ijparser *.c -ll -ly
 
-#rm ijparser.zip
-#zip -r ijparser.zip ijscanner.l ijparser.y
+rm ijparser.zip
+zip -r ijparser.zip ijscanner.l ijparser.y
 
