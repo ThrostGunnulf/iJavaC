@@ -1,4 +1,4 @@
-Terminals unused in grammar
+Terminals which are not used
 
    RESERVED
 
@@ -158,8 +158,8 @@ expr (54)
     on left: 34 35 36, on right: 26 27 28 29 30 31 32 35 37 38 39 40
     41 42 46 47 48 49 50 53 54 55 56
 expr1 (55)
-    on left: 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52, on right:
-    34 35
+    on left: 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52,
+    on right: 34 35
 expr2 (56)
     on left: 53 54, on right: 36
 args (57)

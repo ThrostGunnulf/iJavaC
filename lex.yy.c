@@ -46,6 +46,7 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
+typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -53,6 +54,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -82,8 +84,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -141,15 +141,7 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k.
- * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
- * Ditto for the __ia64__ case accordingly.
- */
-#define YY_BUF_SIZE 32768
-#else
 #define YY_BUF_SIZE 16384
-#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -161,7 +153,12 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int yyleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
+extern yy_size_t yyleng;
 
 extern FILE *yyin, *yyout;
 
@@ -169,20 +166,7 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
-    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
-     *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE yylex. 
-     *       One obvious solution it to make yy_act a global. I tried that, and saw
-     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
-     *       normally declared as a register variable-- so it is not worth it.
-     */
-    #define  YY_LESS_LINENO(n) \
-            do { \
-                int yyl;\
-                for ( yyl = n; yyl < yyleng; ++yyl )\
-                    if ( yytext[yyl] == '\n' )\
-                        --yylineno;\
-            }while(0)
+    #define YY_LESS_LINENO(n)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -199,11 +183,6 @@ extern FILE *yyin, *yyout;
 	while ( 0 )
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -222,7 +201,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -292,8 +271,8 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int yyleng;
+static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
+yy_size_t yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = (char *) 0;
@@ -321,7 +300,7 @@ static void yy_init_buffer (YY_BUFFER_STATE b,FILE *file  );
 
 YY_BUFFER_STATE yy_scan_buffer (char *base,yy_size_t size  );
 YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,int len  );
+YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,yy_size_t len  );
 
 void *yyalloc (yy_size_t  );
 void *yyrealloc (void *,yy_size_t  );
@@ -376,7 +355,7 @@ static void yy_fatal_error (yyconst char msg[]  );
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	yyleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (yy_size_t) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -641,12 +620,6 @@ static yyconst flex_int16_t yy_chk[412] =
       290
     } ;
 
-/* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[36] =
-    {   0,
-0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,     };
-
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
@@ -663,20 +636,26 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "ijscanner.l"
 #line 2 "ijscanner.l"
-#define INITCOL 1
+#define INITCOL  1
+#define INITLINE 1
 
 #define YYSTYPE_IS_DECLARED
 #define YYSTYPE char*
 
 #include <string.h>
-#include "y.tab.h"
+#include "ijparser.tab.h"
+
+void colCount(int l);
 
 extern YYSTYPE yylval;
 
 int colNo = INITCOL;
-int lineScom = 0,  colScom = 0;
+int prevColNo = INITCOL;
+int lineNo = INITLINE;
+int prevLineNo = INITLINE;
+int lineScom = 0, colScom = 0;
 
-#line 680 "lex.yy.c"
+#line 659 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -716,7 +695,7 @@ FILE *yyget_out (void );
 
 void yyset_out  (FILE * out_str  );
 
-int yyget_leng (void );
+yy_size_t yyget_leng (void );
 
 char *yyget_text (void );
 
@@ -758,12 +737,7 @@ static int input (void );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k */
-#define YY_READ_BUF_SIZE 16384
-#else
 #define YY_READ_BUF_SIZE 8192
-#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -771,7 +745,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -782,7 +756,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		yy_size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -864,9 +838,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 27 "ijscanner.l"
+#line 31 "ijscanner.l"
 
-#line 870 "lex.yy.c"
+#line 844 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -938,16 +912,6 @@ yy_find_action:
 
 		YY_DO_BEFORE_ACTION;
 
-		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
-			{
-			int yyl;
-			for ( yyl = 0; yyl < yyleng; ++yyl )
-				if ( yytext[yyl] == '\n' )
-					   
-    yylineno++;
-;
-			}
-
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -960,187 +924,187 @@ do_action:	/* This label is used only to access EOF actions. */
 			goto yy_find_action;
 
 case YY_STATE_EOF(COMMENT):
-#line 28 "ijscanner.l"
+#line 32 "ijscanner.l"
 {BEGIN 0; printf("Line %d, col %d: unterminated comment\n", lineScom, colScom);}
 	YY_BREAK
 case 1:
 YY_RULE_SETUP
-#line 29 "ijscanner.l"
-{BEGIN 0; colNo += 2;}
+#line 33 "ijscanner.l"
+{BEGIN 0; colCount(yyleng);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 30 "ijscanner.l"
-{colNo++;}
+#line 34 "ijscanner.l"
+{colCount(yyleng);}
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 31 "ijscanner.l"
-{colNo = INITCOL;}
+#line 35 "ijscanner.l"
+{prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 32 "ijscanner.l"
-{BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colNo += 2;}
+#line 36 "ijscanner.l"
+{BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colCount(yyleng);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "ijscanner.l"
-{colNo = INITCOL;}
+#line 37 "ijscanner.l"
+{prevColNo = colNo; colNo = INITCOL;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 35 "ijscanner.l"
-{colNo++;}
+#line 39 "ijscanner.l"
+{colCount(yyleng);}
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 36 "ijscanner.l"
-{colNo = INITCOL;}
+#line 40 "ijscanner.l"
+{prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 37 "ijscanner.l"
-{return RESERVED; yylval = strdup(yytext); colNo += yyleng;}
+#line 41 "ijscanner.l"
+{return RESERVED; yylval = strdup(yytext); colCount(yyleng);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 39 "ijscanner.l"
-{colNo += yyleng; return INT;}
+#line 43 "ijscanner.l"
+{colCount(yyleng); return INT;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 40 "ijscanner.l"
-{colNo += yyleng; return BOOL;}
+#line 44 "ijscanner.l"
+{colCount(yyleng); return BOOL;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 41 "ijscanner.l"
-{colNo += yyleng; return NEW;}
+#line 45 "ijscanner.l"
+{colCount(yyleng); return NEW;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 42 "ijscanner.l"
-{colNo += yyleng; return IF;}
+#line 46 "ijscanner.l"
+{colCount(yyleng); return IF;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "ijscanner.l"
-{colNo += yyleng; return ELSE;}
+#line 47 "ijscanner.l"
+{colCount(yyleng); return ELSE;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "ijscanner.l"
-{colNo += yyleng; return WHILE;}
+#line 48 "ijscanner.l"
+{colCount(yyleng); return WHILE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 45 "ijscanner.l"
-{colNo += yyleng; return PRINT;}
+#line 49 "ijscanner.l"
+{colCount(yyleng); return PRINT;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 46 "ijscanner.l"
-{colNo += yyleng; return PARSEINT;}
+#line 50 "ijscanner.l"
+{colCount(yyleng); return PARSEINT;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 47 "ijscanner.l"
-{colNo += yyleng; return CLASS;}
+#line 51 "ijscanner.l"
+{colCount(yyleng); return CLASS;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 48 "ijscanner.l"
-{colNo += yyleng; return PUBLIC;}
+#line 52 "ijscanner.l"
+{colCount(yyleng); return PUBLIC;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 49 "ijscanner.l"
-{colNo += yyleng; return STATIC;}
+#line 53 "ijscanner.l"
+{colCount(yyleng); return STATIC;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 50 "ijscanner.l"
-{colNo += yyleng; return VOID;}
+#line 54 "ijscanner.l"
+{colCount(yyleng); return VOID;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 51 "ijscanner.l"
-{colNo += yyleng; return STRING;}
+#line 55 "ijscanner.l"
+{colCount(yyleng); return STRING;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 52 "ijscanner.l"
-{colNo += yyleng; return DOTLENGTH;}
+#line 56 "ijscanner.l"
+{colCount(yyleng); return DOTLENGTH;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 53 "ijscanner.l"
-{colNo += yyleng; return RETURN;}
+#line 57 "ijscanner.l"
+{colCount(yyleng); return RETURN;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 54 "ijscanner.l"
-{colNo += yyleng; return yytext[0];}
+#line 58 "ijscanner.l"
+{colCount(yyleng); return yytext[0];}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 55 "ijscanner.l"
-{colNo += yyleng; return AND;}
+#line 59 "ijscanner.l"
+{colCount(yyleng); return AND;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 56 "ijscanner.l"
-{colNo += yyleng; return OR;}
+#line 60 "ijscanner.l"
+{colCount(yyleng); return OR;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 57 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return RELCOMPAR;}
+#line 61 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return RELCOMPAR;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 58 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return EQUALITY;}
+#line 62 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return EQUALITY;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 59 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return ADDITIVE;}
+#line 63 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return ADDITIVE;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 60 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return MULTIPLIC;}
+#line 64 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return MULTIPLIC;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 61 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return BOOLLIT;}
+#line 65 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return BOOLLIT;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 62 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return ID;}
+#line 66 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return ID;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 63 "ijscanner.l"
-{colNo += yyleng; yylval = strdup(yytext); return INTLIT;}
+#line 67 "ijscanner.l"
+{colCount(yyleng); yylval = strdup(yytext); return INTLIT;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 65 "ijscanner.l"
-{printf("Line %d, col %d: illegal character ('%s')\n", yylineno, colNo, yytext); colNo++;}
+#line 69 "ijscanner.l"
+{printf("Line %d, col %d: illegal character ('%s')\n", lineNo, colNo, yytext); colNo++;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 67 "ijscanner.l"
+#line 71 "ijscanner.l"
 ECHO;
 	YY_BREAK
-#line 1144 "lex.yy.c"
+#line 1108 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1326,7 +1290,7 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			int num_to_read =
+			yy_size_t num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -1340,7 +1304,7 @@ static int yy_get_next_buffer (void)
 
 			if ( b->yy_is_our_buffer )
 				{
-				int new_size = b->yy_buf_size * 2;
+				yy_size_t new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1371,7 +1335,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1481,7 +1445,7 @@ static int yy_get_next_buffer (void)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register int number_to_move = (yy_n_chars) + 2;
+		register yy_size_t number_to_move = (yy_n_chars) + 2;
 		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
 		register char *source =
@@ -1500,10 +1464,6 @@ static int yy_get_next_buffer (void)
 		}
 
 	*--yy_cp = (char) c;
-
-    if ( c == '\n' ){
-        --yylineno;
-    }
 
 	(yytext_ptr) = yy_bp;
 	(yy_hold_char) = *yy_cp;
@@ -1534,7 +1494,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -1558,7 +1518,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap( ) )
-						return EOF;
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -1579,11 +1539,6 @@ static int yy_get_next_buffer (void)
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
 	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
-
-	if ( c == '\n' )
-		   
-    yylineno++;
-;
 
 	return c;
 }
@@ -1815,7 +1770,7 @@ void yypop_buffer_state (void)
  */
 static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -1907,17 +1862,16 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param yybytes the byte buffer to scan
- * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n;
-	int i;
+	yy_size_t n, i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -1999,7 +1953,7 @@ FILE *yyget_out  (void)
 /** Get the length of the current token.
  * 
  */
-int yyget_leng  (void)
+yy_size_t yyget_leng  (void)
 {
         return yyleng;
 }
@@ -2055,9 +2009,6 @@ static int yy_init_globals (void)
      * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    /* We do not touch yylineno unless the option is enabled. */
-    yylineno =  1;
-    
     (yy_buffer_stack) = 0;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
@@ -2150,9 +2101,16 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 67 "ijscanner.l"
+#line 71 "ijscanner.l"
 
 
+
+void colCount(int l)
+{
+	prevLineNo = lineNo;
+	prevColNo = colNo;
+	colNo += l;
+}
 
 int yywrap()
 {

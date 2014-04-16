@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include "astNodes.h"
 
 void yyerror(char *s);
 
