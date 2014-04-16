@@ -1,0 +1,53 @@
+Class
+	ID
+	DeclList *
+
+DeclList
+	type	(VARDECL, METHODDECL)
+	union{VarDecl, MethodDecl}
+	next *
+
+VarDecl
+	type	(INT, BOOL, INTARRAY, BOOLARRAY)
+	isStatic	(0, 1)
+	IDList *
+
+IDList
+	ID
+	next *
+
+MethodDecl
+	type	(VOID, INT BOOL)
+	ID
+	ParamList *
+	VarDeclList *
+	StmtList *
+
+ParamList
+	type	(INT, BOOL, STRINGARRAY)
+	ID
+	next *
+
+VarDeclList
+	VarDecl *
+	next *
+
+StmtList
+	type	(IFELSE, RETURN, WHILE, PRINT, STORE, STOREARRAY)
+	Expr1 *
+	Expr2 *
+	StmtList1 *
+	StmtList2 *
+	next *
+
+Expr
+	type	(BINOP, UNOP, PARENTESIS, IDorLIT, CALL, PARSEINT)
+	op		(+, -, *, /, %, <, >, <=, <=, !=, ==, !, DOTLENGTH)
+	Expr1 *
+	Expr2 *
+	IDorLit
+	ArgsList *
+
+ArgsList
+	Expr *
+	next *
