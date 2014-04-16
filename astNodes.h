@@ -3,10 +3,16 @@
 
 typedef struct _argsList ArgsList;
 
+typedef enum {VARDECL, METHODDECL} DeclType;
+typedef enum {VOID_T, INT_T, BOOL_T, INTARRAY, BOOLARRAY, STRINGARRAY} Type;
+typedef enum {IFELSE, RETURN_T, WHILE_T, PRINT_T, STORE, STOREARRAY} StmtType;
+typedef enum {BINOP, UNOP, PARENTESIS, IDorLIT, CALL, PARSEINT_T} ExprType;
+typedef enum {PLUS, MINUS, MUL, DIV, REM, LESSER, GREATER, LEQ, GEQ, DIF, EQ, NOT, DOTLENGTH_T} OpType;
+
 typedef struct _expr
 {
-	int type;
-	int op;
+    ExprType type;
+    OpType op;
 	struct _expr *expr1;
 	struct _expr *expr2;
 	char *idOrLit;
@@ -21,7 +27,7 @@ struct _argsList
 
 typedef struct _stmtList
 {
-	int type;
+    StmtType type;
 	Expr *expr1;
 	Expr *expr2;
 	struct _stmtList *stmtList1;
@@ -37,7 +43,7 @@ typedef struct _idList
 
 typedef struct _varDecl
 {
-	int type;
+    Type type;
 	int isStatic;
 	IDList *idList;
 } VarDecl;
@@ -50,14 +56,14 @@ typedef struct _varDeclList
 
 typedef struct _paramList
 {
-	int type;
+    Type type;
 	char *id;
 	struct _paramList *next;
 } ParamList;
 
 typedef struct _methodDecl
 {
-	int type;
+    Type type;
 	char *id;
 	ParamList *paramList;
 	VarDeclList *varDeclList;
@@ -66,7 +72,7 @@ typedef struct _methodDecl
 
 typedef struct _declList
 {
-	int type;
+    DeclType type;
 	union
 	{
 		VarDecl *varDecl;
