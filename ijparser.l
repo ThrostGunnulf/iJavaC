@@ -3,7 +3,7 @@
 #define INITLINE 1
 
 #include <string.h>
-#include "ijparser.tab.h"
+#include "y.tab.h"
 
 void colCount(int l);
 
@@ -30,7 +30,7 @@ dec             [0-9]
 <COMMENT>"*/"                           {BEGIN 0; colCount(yyleng);}
 <COMMENT>.                              {colCount(yyleng);}
 <COMMENT>"\n"                           {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
-"/*"                                    {BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colCount(yyleng);}
+"/*"                                    {BEGIN COMMENT; lineScom = lineNo; colScom = colNo; colCount(yyleng);}
 "//".*                                  {prevColNo = colNo; colNo = INITCOL;}
 
 " "|"\t"                                {colCount(yyleng);}
