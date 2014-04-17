@@ -2,15 +2,12 @@
 #define INITCOL  1
 #define INITLINE 1
 
-#define YYSTYPE_IS_DECLARED
-#define YYSTYPE char*
-
 #include <string.h>
 #include "ijparser.tab.h"
 
 void colCount(int l);
 
-extern YYSTYPE yylval;
+//extern YYSTYPE yylval;
 
 int colNo = INITCOL;
 int prevColNo = INITCOL;
@@ -38,7 +35,7 @@ dec             [0-9]
 
 " "|"\t"                                {colCount(yyleng);}
 "\n"                                    {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
-{reserved}                              {return RESERVED; yylval = strdup(yytext); colCount(yyleng);}
+{reserved}                              {return RESERVED; yylval.token = strdup(yytext); colCount(yyleng);}
 
 "int"                                   {colCount(yyleng); return INT;}
 "boolean"                               {colCount(yyleng); return BOOL;}
@@ -58,13 +55,13 @@ dec             [0-9]
 "("|")"|"{"|"}"|"["|"]"|"!"|"="|";"|"," {colCount(yyleng); return yytext[0];}
 "&&"                                    {colCount(yyleng); return AND;}
 "||"                                    {colCount(yyleng); return OR;}
-"<"|">"|"<="|">="                       {colCount(yyleng); yylval = strdup(yytext); return RELCOMPAR;}
-"!="|"=="                               {colCount(yyleng); yylval = strdup(yytext); return EQUALITY;}
-"+"|"-"              					{colCount(yyleng); yylval = strdup(yytext); return ADDITIVE;}
-"*"|"/"|"%"								{colCount(yyleng); yylval = strdup(yytext); return MULTIPLIC;}
-"true"|"false"                          {colCount(yyleng); yylval = strdup(yytext); return BOOLLIT;}
-{letter}{alphanumeric}*                 {colCount(yyleng); yylval = strdup(yytext); return ID;}
-{dec}+|"0x"{hex}+                       {colCount(yyleng); yylval = strdup(yytext); return INTLIT;}
+"<"|">"|"<="|">="                       {colCount(yyleng); yylval.token = strdup(yytext); return RELCOMPAR;}
+"!="|"=="                               {colCount(yyleng); yylval.token = strdup(yytext); return EQUALITY;}
+"+"|"-"              					{colCount(yyleng); yylval.token = strdup(yytext); return ADDITIVE;}
+"*"|"/"|"%"								{colCount(yyleng); yylval.token = strdup(yytext); return MULTIPLIC;}
+"true"|"false"                          {colCount(yyleng); yylval.token = strdup(yytext); return BOOLLIT;}
+{letter}{alphanumeric}*                 {colCount(yyleng); yylval.token = strdup(yytext); return ID;}
+{dec}+|"0x"{hex}+                       {colCount(yyleng); yylval.token = strdup(yytext); return INTLIT;}
 
 .                                       {printf("Line %d, col %d: illegal character ('%s')\n", lineNo, colNo, yytext); colNo++;}
 

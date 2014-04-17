@@ -9,7 +9,36 @@ extern int prevColNo;
 extern char *yytext;
 %}
 
-%token INT BOOL NEW IF ELSE WHILE PRINT PARSEINT CLASS PUBLIC STATIC VOID STRING DOTLENGTH RETURN AND OR RELCOMPAR BOOLLIT ID INTLIT RESERVED EQUALITY ADDITIVE MULTIPLIC
+%union
+{
+	char *token;	
+	Type type;
+	
+	struct _class *class;
+	DeclList *decllist;
+	VarDecl *vardecl;
+	MethodDecl *methoddecl;
+	ParamList *paramlist;
+	VarDeclList *vardecllist;
+	IDList *idlist;	
+	StmtList *stmtlist;	
+	Expr *expr;
+	ArgsList *argslist;
+}
+
+%token <token> INT BOOL NEW IF ELSE WHILE PRINT PARSEINT CLASS PUBLIC STATIC VOID STRING DOTLENGTH RETURN AND OR RELCOMPAR BOOLLIT ID INTLIT RESERVED EQUALITY ADDITIVE MULTIPLIC
+
+%type <class>		start
+%type <decllist>	decls
+%type <vardecl>		fielddecl
+%type <methoddecl>	methoddecl
+%type <paramlist>	formalparams formalparamslist
+%type <vardecllist>	vardecl
+%type <idlist>		vardecllist
+%type <stmtlist>	stmtlist statement
+%type <expr>		expr expr1 expr2
+%type <argslist> 	args argslist
+%type <type>		methodtype type
 
 %left OR
 %left AND
