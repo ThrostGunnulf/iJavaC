@@ -7,8 +7,6 @@
 
 void colCount(int l);
 
-//extern YYSTYPE yylval;
-
 int colNo = INITCOL;
 int prevColNo = INITCOL;
 int lineNo = INITLINE;

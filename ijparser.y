@@ -1,8 +1,6 @@
 %{
 #include <stdio.h>
-#include "astNodes.h"
-
-void yyerror(char *s);
+//#include "astNodes.h"
 
 extern int prevLineNo;
 extern int prevColNo;
@@ -12,9 +10,9 @@ extern char *yytext;
 %union
 {
 	char *token;	
-	Type type;
+	/*Type type;
 	
-	struct _class *class;
+	Class *class;
 	DeclList *decllist;
 	VarDecl *vardecl;
 	MethodDecl *methoddecl;
@@ -23,12 +21,12 @@ extern char *yytext;
 	IDList *idlist;	
 	StmtList *stmtlist;	
 	Expr *expr;
-	ArgsList *argslist;
+	ArgsList *argslist;*/
 }
 
 %token <token> INT BOOL NEW IF ELSE WHILE PRINT PARSEINT CLASS PUBLIC STATIC VOID STRING DOTLENGTH RETURN AND OR RELCOMPAR BOOLLIT ID INTLIT RESERVED EQUALITY ADDITIVE MULTIPLIC
 
-%type <class>		start
+/*%type <class>		start
 %type <decllist>	decls
 %type <vardecl>		fielddecl
 %type <methoddecl>	methoddecl
@@ -38,7 +36,7 @@ extern char *yytext;
 %type <stmtlist>	stmtlist statement
 %type <expr>		expr expr1 expr2
 %type <argslist> 	args argslist
-%type <type>		methodtype type
+%type <type>		methodtype type*/
 
 %left OR
 %left AND
@@ -74,18 +72,19 @@ methodtype: type                                                                
 
 formalparams: type ID formalparamslist
             | STRING '[' ']' ID                                                  {}
-            | ;
+            | 																	 {}
 
 formalparamslist: formalparamslist ',' type ID                                   {}
-                | ;
+                | 																 {}
 
 stmtlist: stmtlist statement                                                     {}
-        | ;
+        | 																		 {}
 
-vardecl: type ID vardecllist ';'                                                 {};
+vardecl: type ID vardecllist ';'                                                 {}
+	   | 																		 {}
 
 vardecllist: vardecllist ',' ID                                                  {}
-           | ;
+           | 																	 {}
 
 type: INT '[' ']'                                                                {}
     | BOOL '[' ']'                                                               {}
@@ -139,4 +138,4 @@ int main()
     return 0;
 }
 
-void yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);}
+int yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);}
