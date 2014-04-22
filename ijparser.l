@@ -3,6 +3,7 @@
 #define INITLINE 1
 
 #include <string.h>
+#include "astNodes.h"
 #include "y.tab.h"
 
 void colCount(int l);

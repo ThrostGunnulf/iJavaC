@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-//#include "astNodes.h"
+#include "astNodes.h"
 
 extern int prevLineNo;
 extern int prevColNo;
@@ -10,9 +10,9 @@ extern char *yytext;
 %union
 {
 	char *token;	
-	/*Type type;
+	Type type;
 	
-	Class *class;
+	struct _class *class;
 	DeclList *decllist;
 	VarDecl *vardecl;
 	MethodDecl *methoddecl;
@@ -21,12 +21,12 @@ extern char *yytext;
 	IDList *idlist;	
 	StmtList *stmtlist;	
 	Expr *expr;
-	ArgsList *argslist;*/
+	ArgsList *argslist;
 }
 
 %token <token> INT BOOL NEW IF ELSE WHILE PRINT PARSEINT CLASS PUBLIC STATIC VOID STRING DOTLENGTH RETURN AND OR RELCOMPAR BOOLLIT ID INTLIT RESERVED EQUALITY ADDITIVE MULTIPLIC
 
-/*%type <class>		start
+%type <class>		start
 %type <decllist>	decls
 %type <vardecl>		fielddecl
 %type <methoddecl>	methoddecl
@@ -34,9 +34,9 @@ extern char *yytext;
 %type <vardecllist>	vardecl
 %type <idlist>		vardecllist
 %type <stmtlist>	stmtlist statement
-%type <expr>		expr expr1 expr2
+%type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args argslist
-%type <type>		methodtype type*/
+%type <type>		methodtype type
 
 %left OR
 %left AND
@@ -70,7 +70,7 @@ methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlis
 methodtype: type                                                                 {}
           | VOID                                                                 {};
 
-formalparams: type ID formalparamslist
+formalparams: type ID formalparamslist											 {}
             | STRING '[' ']' ID                                                  {}
             | 																	 {}
 
@@ -101,29 +101,29 @@ statement: '{' stmtlist '}'                                                     
          | RETURN expr ';'                                                       {}
          | RETURN ';'                                                            {};
 
-expr: expr1				  %prec EXPR1REDUCE									      {}
-	| expr1 '[' expr ']'  				                         				  {}
-	| expr2																		  {};
+expr: exprindex				  %prec EXPR1REDUCE									  {}
+	| exprindex '[' expr ']'  				                         			  {}
+	| exprnotindex																  {};
 
-expr1: expr AND expr                                                              {}
-     | expr OR expr                                                               {}
-     | expr RELCOMPAR expr                                                        {}
-     | expr EQUALITY expr                                                         {}
-     | expr ADDITIVE expr                                                         {}
-     | expr MULTIPLIC expr                                                        {}
-     | ID                                                                         {}
-     | INTLIT                                                                     {}
-     | BOOLLIT                                                                    {}
-     | '(' expr ')'                                                               {}
-     | expr DOTLENGTH                                                             {}
-     | '!' expr          %prec UNARY                                              {}
-     | ADDITIVE expr     %prec UNARY                                              {}
-     | PARSEINT '(' ID '[' expr ']' ')'                                           {}
-     | ID '(' args ')'                                                            {}
-     | ID '(' ')'                                                                 {};
+exprindex: expr AND expr                                                              {}
+     	 | expr OR expr                                                               {}
+     	 | expr RELCOMPAR expr                                                        {}
+     	 | expr EQUALITY expr                                                         {}
+     	 | expr ADDITIVE expr                                                         {}
+     	 | expr MULTIPLIC expr                                                        {}
+     	 | ID                                                                         {}
+     	 | INTLIT                                                                     {}
+     	 | BOOLLIT                                                                    {}
+     	 | '(' expr ')'                                                               {}
+     	 | expr DOTLENGTH                                                             {}
+     	 | '!' expr          %prec UNARY                                              {}
+     	 | ADDITIVE expr     %prec UNARY                                              {}
+     	 | PARSEINT '(' ID '[' expr ']' ')'                                           {}
+     	 | ID '(' args ')'                                                            {}
+     	 | ID '(' ')'                                                                 {};
 
-expr2: NEW INT '[' expr ']'                                                       {}
-     | NEW BOOL '[' expr ']'                                                      {};
+exprnotindex: NEW INT '[' expr ']'                                                {}
+     		| NEW BOOL '[' expr ']'                                               {};
 
 args: expr argslist                                                               {}
     | expr                                                                        {};
