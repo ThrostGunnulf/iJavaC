@@ -34,7 +34,7 @@ dec             [0-9]
 <<EOF>>									{colCount(0); return yytext[0];}
 " "|"\t"                                {colCount(yyleng);}
 "\n"                                    {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
-{reserved}                              {return RESERVED; yylval.token = strdup(yytext); colCount(yyleng);}
+{reserved}                              {yylval.token = strdup(yytext); colCount(yyleng); return RESERVED; }
 
 "int"                                   {colCount(yyleng); return INT;}
 "boolean"                               {colCount(yyleng); return BOOL;}

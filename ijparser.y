@@ -80,7 +80,7 @@ formalparamslist: formalparamslist ',' type ID                                  
 stmtlist: stmtlist statement                                                     {}
         | 																		 {}
 
-vardecl: type ID vardecllist ';'                                                 {}
+vardecl: vardecl type ID vardecllist ';'                                          {}
 	   | 																		 {}
 
 vardecllist: vardecllist ',' ID                                                  {}
