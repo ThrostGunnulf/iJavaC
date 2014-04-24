@@ -3,11 +3,10 @@
 #define INITLINE 1
 
 #include <string.h>
-#include "ijparser.tab.h"
+#include "astNodes.h"
+#include "y.tab.h"
 
 void colCount(int l);
-
-//extern YYSTYPE yylval;
 
 int colNo = INITCOL;
 int prevColNo = INITCOL;
@@ -26,16 +25,17 @@ dec             [0-9]
 %X COMMENT
 
 %%
-<COMMENT><<EOF>>                        {BEGIN 0; printf("Line %d, col %d: unterminated comment\n", lineScom, colScom);}
+<COMMENT><<EOF>>                        {BEGIN 0; colCount(0); printf("Line %d, col %d: unterminated comment\n", lineScom, colScom);}
 <COMMENT>"*/"                           {BEGIN 0; colCount(yyleng);}
 <COMMENT>.                              {colCount(yyleng);}
 <COMMENT>"\n"                           {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
-"/*"                                    {BEGIN COMMENT; lineScom = yylineno; colScom = colNo; colCount(yyleng);}
+"/*"                                    {BEGIN COMMENT; lineScom = lineNo; colScom = colNo; colCount(yyleng);}
 "//".*                                  {prevColNo = colNo; colNo = INITCOL;}
 
+<<EOF>>									{colCount(0); return yytext[0];}
 " "|"\t"                                {colCount(yyleng);}
 "\n"                                    {prevLineNo = lineNo++; prevColNo = colNo; colNo = INITCOL;}
-{reserved}                              {return RESERVED; yylval.token = strdup(yytext); colCount(yyleng);}
+{reserved}                              {yylval.token = strdup(yytext); colCount(yyleng); return RESERVED; }
 
 "int"                                   {colCount(yyleng); return INT;}
 "boolean"                               {colCount(yyleng); return BOOL;}

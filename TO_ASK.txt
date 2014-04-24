@@ -1,3 +1,0 @@
-Qual a utilidade da regra 2 de Expr?
-Removê-la trata o problema do "new int[5][2]"
-e de tentativas de indexação de arrays bidimensionais.

@@ -161,7 +161,26 @@ extern char *yytext;
 #endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+#line 13 "ijparser.y"
+{
+	char *token;	
+	Type type;
+	
+	struct _class *class;
+	DeclList *decllist;
+	VarDecl *vardecl;
+	MethodDecl *methoddecl;
+	ParamList *paramlist;
+	VarDeclList *vardecllist;
+	IDList *idlist;	
+	StmtList *stmtlist;	
+	Expr *expr;
+	ArgsList *argslist;
+}
+/* Line 193 of yacc.c.  */
+#line 183 "ijparser.tab.c"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -173,7 +192,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 177 "ijparser.tab.c"
+#line 196 "ijparser.tab.c"
 
 #ifdef short
 # undef short
@@ -484,12 +503,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    31,    31,    32,    34,    35,    36,    37,    39,    41,
-      43,    44,    46,    47,    48,    50,    51,    53,    54,    56,
-      58,    59,    61,    62,    63,    64,    66,    67,    68,    69,
-      70,    71,    72,    73,    74,    76,    77,    78,    80,    81,
-      82,    83,    84,    85,    86,    87,    88,    89,    90,    91,
-      92,    93,    94,    95,    97,    98,   100,   101,   103
+       0,    60,    60,    61,    63,    64,    65,    66,    68,    70,
+      72,    73,    75,    76,    77,    79,    80,    82,    83,    85,
+      87,    88,    90,    91,    92,    93,    95,    96,    97,    98,
+      99,   100,   101,   102,   103,   105,   106,   107,   109,   110,
+     111,   112,   113,   114,   115,   116,   117,   118,   119,   120,
+     121,   122,   123,   124,   126,   127,   129,   130,   132
 };
 #endif
 
@@ -1508,268 +1527,268 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 31 "ijparser.y"
+#line 60 "ijparser.y"
     {;}
     break;
 
   case 3:
-#line 32 "ijparser.y"
-    {;}
-    break;
-
-  case 4:
-#line 34 "ijparser.y"
-    {;}
-    break;
-
-  case 5:
-#line 35 "ijparser.y"
-    {;}
-    break;
-
-  case 6:
-#line 36 "ijparser.y"
-    {;}
-    break;
-
-  case 7:
-#line 37 "ijparser.y"
-    {;}
-    break;
-
-  case 8:
-#line 39 "ijparser.y"
-    {;}
-    break;
-
-  case 9:
-#line 41 "ijparser.y"
-    {;}
-    break;
-
-  case 10:
-#line 43 "ijparser.y"
-    {;}
-    break;
-
-  case 11:
-#line 44 "ijparser.y"
-    {;}
-    break;
-
-  case 13:
-#line 47 "ijparser.y"
-    {;}
-    break;
-
-  case 15:
-#line 50 "ijparser.y"
-    {;}
-    break;
-
-  case 17:
-#line 53 "ijparser.y"
-    {;}
-    break;
-
-  case 19:
-#line 56 "ijparser.y"
-    {;}
-    break;
-
-  case 20:
-#line 58 "ijparser.y"
-    {;}
-    break;
-
-  case 22:
 #line 61 "ijparser.y"
     {;}
     break;
 
-  case 23:
-#line 62 "ijparser.y"
-    {;}
-    break;
-
-  case 24:
+  case 4:
 #line 63 "ijparser.y"
     {;}
     break;
 
-  case 25:
+  case 5:
 #line 64 "ijparser.y"
     {;}
     break;
 
-  case 26:
+  case 6:
+#line 65 "ijparser.y"
+    {;}
+    break;
+
+  case 7:
 #line 66 "ijparser.y"
     {;}
     break;
 
-  case 27:
-#line 67 "ijparser.y"
-    {;}
-    break;
-
-  case 28:
+  case 8:
 #line 68 "ijparser.y"
     {;}
     break;
 
-  case 29:
-#line 69 "ijparser.y"
-    {;}
-    break;
-
-  case 30:
+  case 9:
 #line 70 "ijparser.y"
     {;}
     break;
 
-  case 31:
-#line 71 "ijparser.y"
-    {;}
-    break;
-
-  case 32:
+  case 10:
 #line 72 "ijparser.y"
     {;}
     break;
 
-  case 33:
+  case 11:
 #line 73 "ijparser.y"
     {;}
     break;
 
-  case 34:
-#line 74 "ijparser.y"
-    {;}
-    break;
-
-  case 35:
+  case 13:
 #line 76 "ijparser.y"
     {;}
     break;
 
-  case 36:
-#line 77 "ijparser.y"
+  case 15:
+#line 79 "ijparser.y"
     {;}
     break;
 
-  case 37:
-#line 78 "ijparser.y"
-    {;}
-    break;
-
-  case 38:
-#line 80 "ijparser.y"
-    {;}
-    break;
-
-  case 39:
-#line 81 "ijparser.y"
-    {;}
-    break;
-
-  case 40:
+  case 17:
 #line 82 "ijparser.y"
     {;}
     break;
 
-  case 41:
-#line 83 "ijparser.y"
-    {;}
-    break;
-
-  case 42:
-#line 84 "ijparser.y"
-    {;}
-    break;
-
-  case 43:
+  case 19:
 #line 85 "ijparser.y"
     {;}
     break;
 
-  case 44:
-#line 86 "ijparser.y"
-    {;}
-    break;
-
-  case 45:
+  case 20:
 #line 87 "ijparser.y"
     {;}
     break;
 
-  case 46:
-#line 88 "ijparser.y"
-    {;}
-    break;
-
-  case 47:
-#line 89 "ijparser.y"
-    {;}
-    break;
-
-  case 48:
+  case 22:
 #line 90 "ijparser.y"
     {;}
     break;
 
-  case 49:
+  case 23:
 #line 91 "ijparser.y"
     {;}
     break;
 
-  case 50:
+  case 24:
 #line 92 "ijparser.y"
     {;}
     break;
 
-  case 51:
+  case 25:
 #line 93 "ijparser.y"
     {;}
     break;
 
-  case 52:
-#line 94 "ijparser.y"
-    {;}
-    break;
-
-  case 53:
+  case 26:
 #line 95 "ijparser.y"
     {;}
     break;
 
-  case 54:
+  case 27:
+#line 96 "ijparser.y"
+    {;}
+    break;
+
+  case 28:
 #line 97 "ijparser.y"
     {;}
     break;
 
-  case 55:
+  case 29:
 #line 98 "ijparser.y"
     {;}
     break;
 
-  case 56:
+  case 30:
+#line 99 "ijparser.y"
+    {;}
+    break;
+
+  case 31:
 #line 100 "ijparser.y"
     {;}
     break;
 
-  case 57:
+  case 32:
 #line 101 "ijparser.y"
     {;}
     break;
 
-  case 58:
+  case 33:
+#line 102 "ijparser.y"
+    {;}
+    break;
+
+  case 34:
 #line 103 "ijparser.y"
+    {;}
+    break;
+
+  case 35:
+#line 105 "ijparser.y"
+    {;}
+    break;
+
+  case 36:
+#line 106 "ijparser.y"
+    {;}
+    break;
+
+  case 37:
+#line 107 "ijparser.y"
+    {;}
+    break;
+
+  case 38:
+#line 109 "ijparser.y"
+    {;}
+    break;
+
+  case 39:
+#line 110 "ijparser.y"
+    {;}
+    break;
+
+  case 40:
+#line 111 "ijparser.y"
+    {;}
+    break;
+
+  case 41:
+#line 112 "ijparser.y"
+    {;}
+    break;
+
+  case 42:
+#line 113 "ijparser.y"
+    {;}
+    break;
+
+  case 43:
+#line 114 "ijparser.y"
+    {;}
+    break;
+
+  case 44:
+#line 115 "ijparser.y"
+    {;}
+    break;
+
+  case 45:
+#line 116 "ijparser.y"
+    {;}
+    break;
+
+  case 46:
+#line 117 "ijparser.y"
+    {;}
+    break;
+
+  case 47:
+#line 118 "ijparser.y"
+    {;}
+    break;
+
+  case 48:
+#line 119 "ijparser.y"
+    {;}
+    break;
+
+  case 49:
+#line 120 "ijparser.y"
+    {;}
+    break;
+
+  case 50:
+#line 121 "ijparser.y"
+    {;}
+    break;
+
+  case 51:
+#line 122 "ijparser.y"
+    {;}
+    break;
+
+  case 52:
+#line 123 "ijparser.y"
+    {;}
+    break;
+
+  case 53:
+#line 124 "ijparser.y"
+    {;}
+    break;
+
+  case 54:
+#line 126 "ijparser.y"
+    {;}
+    break;
+
+  case 55:
+#line 127 "ijparser.y"
+    {;}
+    break;
+
+  case 56:
+#line 129 "ijparser.y"
+    {;}
+    break;
+
+  case 57:
+#line 130 "ijparser.y"
+    {;}
+    break;
+
+  case 58:
+#line 132 "ijparser.y"
     {;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1773 "ijparser.tab.c"
+#line 1792 "ijparser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1983,7 +2002,7 @@ yyreturn:
 }
 
 
-#line 105 "ijparser.y"
+#line 134 "ijparser.y"
 
 
 int main()

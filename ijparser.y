@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "astNodes.h"
 
-void yyerror(char *s);
-
 extern int prevLineNo;
 extern int prevColNo;
 extern char *yytext;
@@ -36,7 +34,7 @@ extern char *yytext;
 %type <vardecllist>	vardecl
 %type <idlist>		vardecllist
 %type <stmtlist>	stmtlist statement
-%type <expr>		expr expr1 expr2
+%type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args argslist
 %type <type>		methodtype type
 
@@ -72,20 +70,21 @@ methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlis
 methodtype: type                                                                 {}
           | VOID                                                                 {};
 
-formalparams: type ID formalparamslist
+formalparams: type ID formalparamslist											 {}
             | STRING '[' ']' ID                                                  {}
-            | ;
+            | 																	 {}
 
 formalparamslist: formalparamslist ',' type ID                                   {}
-                | ;
+                | 																 {}
 
 stmtlist: stmtlist statement                                                     {}
-        | ;
+        | 																		 {}
 
-vardecl: type ID vardecllist ';'                                                 {};
+vardecl: vardecl type ID vardecllist ';'                                          {}
+	   | 																		 {}
 
 vardecllist: vardecllist ',' ID                                                  {}
-           | ;
+           | 																	 {}
 
 type: INT '[' ']'                                                                {}
     | BOOL '[' ']'                                                               {}
@@ -102,29 +101,29 @@ statement: '{' stmtlist '}'                                                     
          | RETURN expr ';'                                                       {}
          | RETURN ';'                                                            {};
 
-expr: expr1				  %prec EXPR1REDUCE									      {}
-	| expr1 '[' expr ']'  				                         				  {}
-	| expr2																		  {};
+expr: exprindex				  %prec EXPR1REDUCE									  {}
+	| exprindex '[' expr ']'  				                         			  {}
+	| exprnotindex																  {};
 
-expr1: expr AND expr                                                              {}
-     | expr OR expr                                                               {}
-     | expr RELCOMPAR expr                                                        {}
-     | expr EQUALITY expr                                                         {}
-     | expr ADDITIVE expr                                                         {}
-     | expr MULTIPLIC expr                                                        {}
-     | ID                                                                         {}
-     | INTLIT                                                                     {}
-     | BOOLLIT                                                                    {}
-     | '(' expr ')'                                                               {}
-     | expr DOTLENGTH                                                             {}
-     | '!' expr          %prec UNARY                                              {}
-     | ADDITIVE expr     %prec UNARY                                              {}
-     | PARSEINT '(' ID '[' expr ']' ')'                                           {}
-     | ID '(' args ')'                                                            {}
-     | ID '(' ')'                                                                 {};
+exprindex: expr AND expr                                                              {}
+     	 | expr OR expr                                                               {}
+     	 | expr RELCOMPAR expr                                                        {}
+     	 | expr EQUALITY expr                                                         {}
+     	 | expr ADDITIVE expr                                                         {}
+     	 | expr MULTIPLIC expr                                                        {}
+     	 | ID                                                                         {}
+     	 | INTLIT                                                                     {}
+     	 | BOOLLIT                                                                    {}
+     	 | '(' expr ')'                                                               {}
+     	 | expr DOTLENGTH                                                             {}
+     	 | '!' expr          %prec UNARY                                              {}
+     	 | ADDITIVE expr     %prec UNARY                                              {}
+     	 | PARSEINT '(' ID '[' expr ']' ')'                                           {}
+     	 | ID '(' args ')'                                                            {}
+     	 | ID '(' ')'                                                                 {};
 
-expr2: NEW INT '[' expr ']'                                                       {}
-     | NEW BOOL '[' expr ']'                                                      {};
+exprnotindex: NEW INT '[' expr ']'                                                {}
+     		| NEW BOOL '[' expr ']'                                               {};
 
 args: expr argslist                                                               {}
     | expr                                                                        {};
@@ -139,4 +138,4 @@ int main()
     return 0;
 }
 
-void yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);}
+int yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);}
