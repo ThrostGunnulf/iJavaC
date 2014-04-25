@@ -21,7 +21,8 @@ Class* myProgram;
 	ParamList *paramlist;
 	VarDeclList *vardecllist;
 	IDList *idlist;	
-	StmtList *stmtlist;	
+	StmtList *stmtlist;
+	Stmt *stmt;	
 	Expr *expr;
 	ArgsList *argslist;
 }
@@ -35,7 +36,8 @@ Class* myProgram;
 %type <paramlist>	formalparams formalparamslist
 %type <vardecllist>	vardecl 
 %type <idlist>		idlist
-%type <stmtlist>	stmtlist statement
+%type <stmtlist>	stmtlist
+%type <stmt>		statement
 %type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args argslist
 %type <type>		methodtype type
@@ -79,13 +81,13 @@ formalparams: type ID formalparamslist			 {}
 formalparamslist: formalparamslist ',' type ID   {}
                 | 						 		 {$$=NULL;}
 
-stmtlist: stmtlist statement              {}
+stmtlist: stmtlist statement              {$$=insertStmt($2, $1);}
         | 								  {$$=NULL;};
 
 vardecl: vardecl type ID idlist ';'  	  {}
 	   | 								  {$$=NULL;};
 
-idlist: idlist ',' ID          	  		  {}
+idlist: idlist ',' ID          	  		  {$$=insertID($3, $1);}
       | 							 	  {$$=NULL;};
 
 type: INT '[' ']'                         {$$=INTARRAY;}

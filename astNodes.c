@@ -43,3 +43,27 @@ VarDecl* insertFieldDecl(Type type, char* id, IDList* list)
 
     return newVarDecl;
 }
+
+IDList* insertID(char* id, IDList* list)
+{
+    IDList* newID = (IDList*) malloc(sizeof(IDList));
+    newID->id = id;
+
+    IDList *aux = list;
+    for(; aux->next != NULL; aux = aux->next);
+    aux->next = newID;
+
+    return list;
+}
+
+StmtList* insertStmt(Stmt* stmt, StmtList* list)
+{
+    StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
+    newStmtList->stmt = stmt;
+
+    StmtList* aux = list;
+    for(; aux->next != NULL; aux = aux->next);
+    aux->next = newStmtList;
+
+    return list;
+}
