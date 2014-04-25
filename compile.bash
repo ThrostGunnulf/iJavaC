@@ -1,5 +1,5 @@
 flex ijparser.l
-bison -d ijparser.y
+bison --defines=y.tab.h ijparser.y
 gcc -o ijparser *.c -ll -ly
 
 rm ijparser.zip

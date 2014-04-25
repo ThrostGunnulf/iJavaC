@@ -5,6 +5,8 @@
 extern int prevLineNo;
 extern int prevColNo;
 extern char *yytext;
+
+Class* myProgram;
 %}
 
 %union
@@ -31,7 +33,7 @@ extern char *yytext;
 %type <vardecl>		fielddecl
 %type <methoddecl>	methoddecl
 %type <paramlist>	formalparams formalparamslist
-%type <vardecllist>	vardecl
+%type <vardecllist>	vardecl 
 %type <idlist>		vardecllist
 %type <stmtlist>	stmtlist statement
 %type <expr>		expr exprindex exprnotindex
@@ -55,41 +57,41 @@ extern char *yytext;
 
 %%
 
-start: CLASS ID '{' decls '}'                                                    {}
-	 | CLASS ID '{' '}'                                     		             {}
+start: CLASS ID '{' decls '}'             {$$=insertClass($2, $4); myProgram = $$;}
+	 | CLASS ID '{' '}'                   {$$=insertClass($2, NULL); myProgram = $$;}
 
-decls: decls fielddecl                                                           {}
-     | decls methoddecl                                                          {}
-     | fielddecl                                                                 {}
-     | methoddecl                                                                {};
+decls: decls fielddecl                    {$$=insertDecl(VARDECL, $2, $1);}
+     | decls methoddecl                   {$$=insertDecl(METHODDECL, $2, $1);}
+     | fielddecl                          {$$=insertDecl(VARDECL, $1, NULL);}
+     | methoddecl                         {$$=insertDecl(METHODDECL, $1, NULL);};
 
-fielddecl: STATIC vardecl                                                        {};
+fielddecl: STATIC type ID vardecllist ';' {$$=insertFieldDecl($2, $3, $4);};
 
 methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlist '}'    {};
 
-methodtype: type                                                                 {}
-          | VOID                                                                 {};
+methodtype: type                          {$$=$1;}
+          | VOID                          {$$=VOID_T;};
 
-formalparams: type ID formalparamslist											 {}
-            | STRING '[' ']' ID                                                  {}
-            | 																	 {}
+formalparams: type ID formalparamslist			 {}
+            | STRING '[' ']' ID                  {}
+            | 									 {$$=NULL;};
 
-formalparamslist: formalparamslist ',' type ID                                   {}
-                | 																 {}
+formalparamslist: formalparamslist ',' type ID   {}
+                | 						 		 {$$=NULL;}
 
-stmtlist: stmtlist statement                                                     {}
-        | 																		 {}
+stmtlist: stmtlist statement              {}
+        | 								  {$$=NULL;};
 
-vardecl: vardecl type ID vardecllist ';'                                          {}
-	   | 																		 {}
+vardecl: vardecl type ID vardecllist ';'  {}
+	   | 								  {$$=NULL;};
 
-vardecllist: vardecllist ',' ID                                                  {}
-           | 																	 {}
+vardecllist: vardecllist ',' ID           {}
+           | 							  {$$=NULL;};
 
-type: INT '[' ']'                                                                {}
-    | BOOL '[' ']'                                                               {}
-    | INT                                                                        {}
-    | BOOL                                                                       {};
+type: INT '[' ']'                         {$$=INTARRAY;}
+    | BOOL '[' ']'                        {$$=BOOLARRAY;}
+    | INT                                 {$$=INT_T;}
+    | BOOL                                {$$=BOOL_T;};
 
 statement: '{' stmtlist '}'                                                      {}
          | IF '(' expr ')' statement ELSE statement   %prec ELSE                 {}

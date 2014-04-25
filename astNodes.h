@@ -1,13 +1,19 @@
 #ifndef ASTNODES_H
 #define ASTNODES_H
 
-typedef struct _argsList ArgsList;
+////
+// Enums of nodes types.
 
 typedef enum {VARDECL, METHODDECL} DeclType;
 typedef enum {VOID_T, INT_T, BOOL_T, INTARRAY, BOOLARRAY, STRINGARRAY} Type;
 typedef enum {IFELSE, RETURN_T, WHILE_T, PRINT_T, STORE, STOREARRAY} StmtType;
-typedef enum {BINOP, UNOP, PARENTESIS, IDorLIT, CALL, PARSEINT_T} ExprType;
+typedef enum {BINOP, UNOP, PARENTHESIS, IDorLIT, CALL, PARSEINT_T} ExprType;
 typedef enum {PLUS, MINUS, MUL, DIV, REM, LESSER, GREATER, LEQ, GEQ, DIF, EQ, NOT, DOTLENGTH_T} OpType;
+
+////
+// Nodes definitions.
+
+typedef struct _argsList ArgsList;
 
 typedef struct _expr
 {
@@ -78,6 +84,7 @@ typedef struct _declList
 		VarDecl *varDecl;
 		MethodDecl *methodDecl;
 	};
+    struct _declList *next;
 } DeclList;
 
 typedef struct _class
@@ -85,5 +92,12 @@ typedef struct _class
 	char *id;
 	DeclList *declList;
 } Class;
+
+////
+// Functions for node handling.
+
+Class* insertClass(char*, DeclList*);
+DeclList* insertDecl(DeclType, void*, DeclList*);
+VarDecl* insertFieldDecl(Type, char*, IDList*);
 
 #endif
