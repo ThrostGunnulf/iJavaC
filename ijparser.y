@@ -34,7 +34,7 @@ Class* myProgram;
 %type <methoddecl>	methoddecl
 %type <paramlist>	formalparams formalparamslist
 %type <vardecllist>	vardecl 
-%type <idlist>		vardecllist
+%type <idlist>		idlist
 %type <stmtlist>	stmtlist statement
 %type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args argslist
@@ -65,7 +65,7 @@ decls: decls fielddecl                    {$$=insertDecl(VARDECL, $2, $1);}
      | fielddecl                          {$$=insertDecl(VARDECL, $1, NULL);}
      | methoddecl                         {$$=insertDecl(METHODDECL, $1, NULL);};
 
-fielddecl: STATIC type ID vardecllist ';' {$$=insertFieldDecl($2, $3, $4);};
+fielddecl: STATIC type ID idlist ';' 	  {$$=insertFieldDecl($2, $3, $4);};
 
 methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlist '}'    {};
 
@@ -82,11 +82,11 @@ formalparamslist: formalparamslist ',' type ID   {}
 stmtlist: stmtlist statement              {}
         | 								  {$$=NULL;};
 
-vardecl: vardecl type ID vardecllist ';'  {}
+vardecl: vardecl type ID idlist ';'  	  {}
 	   | 								  {$$=NULL;};
 
-vardecllist: vardecllist ',' ID           {}
-           | 							  {$$=NULL;};
+idlist: idlist ',' ID          	  		  {}
+      | 							 	  {$$=NULL;};
 
 type: INT '[' ']'                         {$$=INTARRAY;}
     | BOOL '[' ']'                        {$$=BOOLARRAY;}
