@@ -31,14 +31,19 @@ struct _argsList
 	struct _argsList *argsList;
 };
 
-typedef struct _stmtList
+typedef struct _stmt
 {
     StmtType type;
 	Expr *expr1;
 	Expr *expr2;
-	struct _stmtList *stmtList1;
-	struct _stmtList *stmtList2;
-	struct _stmtList *next;
+    struct _stmt *stmt1;
+    struct _stmt *stmt2;
+} Stmt;
+
+typedef struct _stmtList
+{
+    Stmt *stmt;
+    struct _stmtList *next;
 } StmtList;
 
 typedef struct _idList
@@ -99,6 +104,8 @@ typedef struct _class
 Class* insertClass(char*, DeclList*);
 DeclList* insertDecl(DeclType, void*, DeclList*);
 VarDecl* insertFieldDecl(Type, char*, IDList*);
-VarDeclList* insertVarDecl(VarDeclList* , Type , char* , IDList* );
+VarDeclList* insertVarDecl(VarDeclList*, Type, char*, IDList*);
+IDList* insertID(char*, IDList*);
+StmtList* insertStmt(Stmt*, StmtList*);
 
 #endif
