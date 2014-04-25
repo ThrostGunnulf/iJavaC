@@ -82,7 +82,7 @@ formalparamslist: formalparamslist ',' type ID   {}
 stmtlist: stmtlist statement              {}
         | 								  {$$=NULL;};
 
-vardecl: vardecl type ID idlist ';'  	  {}
+vardecl: vardecl type ID idlist ';'  	  {$$=insertVarDecl($1 ,$2, $3, $4);}
 	   | 								  {$$=NULL;};
 
 idlist: idlist ',' ID          	  		  {}

@@ -99,5 +99,6 @@ typedef struct _class
 Class* insertClass(char*, DeclList*);
 DeclList* insertDecl(DeclType, void*, DeclList*);
 VarDecl* insertFieldDecl(Type, char*, IDList*);
+VarDeclList* insertVarDecl(VarDeclList* , Type , char* , IDList* );
 
 #endif
