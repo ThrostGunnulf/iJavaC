@@ -30,7 +30,7 @@ DeclList* insertDecl(DeclType type, void* decl, DeclList* list)
     return list;
 }
 
-VarDecl* insertFieldDecl(Type type, char* id, IDList * list)
+VarDecl* insertFieldDecl(Type type, char* id, IDList* list)
 {
     IDList* newId = (IDList*) malloc(sizeof(IDList));
     newId->id = id;
