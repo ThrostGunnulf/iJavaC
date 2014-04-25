@@ -69,16 +69,17 @@ decls: decls fielddecl                    {$$=insertDecl(VARDECL, $2, $1);}
 
 fielddecl: STATIC type ID idlist ';' 	  {$$=insertFieldDecl($2, $3, $4);};
 
-methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlist '}'    {};
+methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlist '}' 
+{$$=insertMethodDecl($3, $4, $6, $9, $10);};
 
 methodtype: type                          {$$=$1;}
           | VOID                          {$$=VOID_T;};
 
-formalparams: type ID formalparamslist			 {}
-            | STRING '[' ']' ID                  {}
+formalparams: type ID formalparamslist			 {$$=insertFormalParam($1, $2, $3, 1);}
+            | STRING '[' ']' ID                  {$$=insertFormalParam(STRINGARRAY, $4, NULL, 1);}
             | 									 {$$=NULL;};
 
-formalparamslist: formalparamslist ',' type ID   {}
+formalparamslist: formalparamslist ',' type ID   {$$=insertFormalParam($3, $4, $1, 0);}
                 | 						 		 {$$=NULL;}
 
 stmtlist: stmtlist statement              {$$=insertStmt($2, $1);}
@@ -95,44 +96,44 @@ type: INT '[' ']'                         {$$=INTARRAY;}
     | INT                                 {$$=INT_T;}
     | BOOL                                {$$=BOOL_T;};
 
-statement: '{' stmtlist '}'                                                      {}
-         | IF '(' expr ')' statement ELSE statement   %prec ELSE                 {}
-         | IF '(' expr ')' statement                  %prec IFX                  {}
-         | WHILE '(' expr ')' statement                                          {}
-         | PRINT '(' expr ')' ';'                                                {}
-         | ID '[' expr ']' '=' expr ';'                                          {}
-         | ID '=' expr ';'                                                       {}
-         | RETURN expr ';'                                                       {}
-         | RETURN ';'                                                            {};
+statement: '{' stmtlist '}'                                         {/*$$=$2;*/}
+         | IF '(' expr ')' statement ELSE statement   %prec ELSE    {}
+         | IF '(' expr ')' statement                  %prec IFX     {}
+         | WHILE '(' expr ')' statement                             {}
+         | PRINT '(' expr ')' ';'                                   {}
+         | ID '[' expr ']' '=' expr ';'                             {}
+         | ID '=' expr ';'                                          {}
+         | RETURN expr ';'                                          {}
+         | RETURN ';'                                               {};
 
-expr: exprindex				  %prec EXPR1REDUCE									  {}
-	| exprindex '[' expr ']'  				                         			  {}
-	| exprnotindex																  {};
+expr: exprindex				  %prec EXPR1REDUCE						{}
+	| exprindex '[' expr ']'  				                        {}
+	| exprnotindex													{};
 
-exprindex: expr AND expr                                                              {}
-     	 | expr OR expr                                                               {}
-     	 | expr RELCOMPAR expr                                                        {}
-     	 | expr EQUALITY expr                                                         {}
-     	 | expr ADDITIVE expr                                                         {}
-     	 | expr MULTIPLIC expr                                                        {}
-     	 | ID                                                                         {}
-     	 | INTLIT                                                                     {}
-     	 | BOOLLIT                                                                    {}
-     	 | '(' expr ')'                                                               {}
-     	 | expr DOTLENGTH                                                             {}
-     	 | '!' expr          %prec UNARY                                              {}
-     	 | ADDITIVE expr     %prec UNARY                                              {}
-     	 | PARSEINT '(' ID '[' expr ']' ')'                                           {}
-     	 | ID '(' args ')'                                                            {}
-     	 | ID '(' ')'                                                                 {};
+exprindex: expr AND expr                                            {}
+     	 | expr OR expr                                             {}
+     	 | expr RELCOMPAR expr                                      {}
+     	 | expr EQUALITY expr                                       {}
+     	 | expr ADDITIVE expr                                       {}
+     	 | expr MULTIPLIC expr                                      {}
+     	 | ID                                                       {}
+     	 | INTLIT                                                   {}
+     	 | BOOLLIT                                                  {}
+     	 | '(' expr ')'                                             {}
+     	 | expr DOTLENGTH                                           {}
+     	 | '!' expr          %prec UNARY                            {}
+     	 | ADDITIVE expr     %prec UNARY                            {}
+     	 | PARSEINT '(' ID '[' expr ']' ')'                         {}
+     	 | ID '(' args ')'                                          {}
+     	 | ID '(' ')'                                               {};
 
-exprnotindex: NEW INT '[' expr ']'                                                {}
-     		| NEW BOOL '[' expr ']'                                               {};
+exprnotindex: NEW INT '[' expr ']'                                  {}
+     		| NEW BOOL '[' expr ']'                                 {};
 
-args: expr argslist                                                               {}
-    | expr                                                                        {};
+args: expr argslist                                                 {}
+    | expr                                                          {};
  
-argslist: ',' args                                                                {};
+argslist: ',' args                                                  {};
 
 %%
 

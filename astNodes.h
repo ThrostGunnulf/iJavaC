@@ -34,10 +34,14 @@ struct _argsList
 typedef struct _stmt
 {
     StmtType type;
-	Expr *expr1;
-	Expr *expr2;
+    Expr *expr1;
     struct _stmt *stmt1;
-    struct _stmt *stmt2;
+    union
+    {
+        Expr *expr2;
+        struct _stmt *stmt2;
+        //struct _stmtList *stmtList;
+    };
 } Stmt;
 
 typedef struct _stmtList
@@ -107,5 +111,7 @@ VarDecl* insertFieldDecl(Type, char*, IDList*);
 VarDeclList* insertVarDecl(VarDeclList*, Type, char*, IDList*);
 IDList* insertID(char*, IDList*);
 StmtList* insertStmt(Stmt*, StmtList*);
+ParamList* insertFormalParam(Type, char*, ParamList*, int);
+MethodDecl* insertMethodDecl(Type, char*, ParamList*, VarDeclList*, StmtList*);
 
 #endif

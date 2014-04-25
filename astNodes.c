@@ -92,3 +92,34 @@ StmtList* insertStmt(Stmt* stmt, StmtList* list)
 
     return list;
 }
+
+ParamList* insertFormalParam(Type type, char* id, ParamList* list, int isHead)
+{
+    ParamList* newParam = (ParamList*) malloc(sizeof(ParamList));
+    newParam->type = type;
+    newParam->id = id;
+
+    if(isHead)
+    {
+        newParam->next = list;
+        return newParam;
+    }
+
+    ParamList* aux = list;
+    for(; aux->next != NULL; aux = aux->next);
+    aux->next = newParam;
+
+    return list;
+}
+
+MethodDecl* insertMethodDecl(Type type, char* id, ParamList* params, VarDeclList* decls, StmtList* stmts)
+{
+    MethodDecl* newMethodDecl = (MethodDecl*) malloc(sizeof(MethodDecl));
+    newMethodDecl->type = type;
+    newMethodDecl->id = id;
+    newMethodDecl->paramList = params;
+    newMethodDecl->varDeclList = decls;
+    newMethodDecl->stmtList = stmts;
+
+    return newMethodDecl;
+}
