@@ -36,8 +36,7 @@ Class* myProgram;
 %type <paramlist>	formalparams formalparamslist
 %type <vardecllist>	vardecl 
 %type <idlist>		idlist
-%type <stmtlist>	stmtlist
-%type <stmt>		statement
+%type <stmtlist>	stmtlist statement
 %type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args argslist
 %type <type>		methodtype type
@@ -82,7 +81,7 @@ formalparams: type ID formalparamslist			 {$$=insertFormalParam($1, $2, $3, 1);}
 formalparamslist: formalparamslist ',' type ID   {$$=insertFormalParam($3, $4, $1, 0);}
                 | 						 		 {$$=NULL;}
 
-stmtlist: stmtlist statement              {$$=insertStmt($2, $1);}
+stmtlist: stmtlist statement              {$$=insertStmtList($2, $1);}
         | 								  {$$=NULL;};
 
 vardecl: vardecl type ID idlist ';'  	  {$$=insertVarDecl($1 ,$2, $3, $4);}
@@ -96,44 +95,44 @@ type: INT '[' ']'                         {$$=INTARRAY;}
     | INT                                 {$$=INT_T;}
     | BOOL                                {$$=BOOL_T;};
 
-statement: '{' stmtlist '}'                                         {/*$$=$2;*/}
-         | IF '(' expr ')' statement ELSE statement   %prec ELSE    {}
-         | IF '(' expr ')' statement                  %prec IFX     {}
-         | WHILE '(' expr ')' statement                             {}
-         | PRINT '(' expr ')' ';'                                   {}
-         | ID '[' expr ']' '=' expr ';'                             {}
-         | ID '=' expr ';'                                          {}
-         | RETURN expr ';'                                          {}
-         | RETURN ';'                                               {};
+statement: '{' stmtlist '}'                                         {$$=$2;}
+         | IF '(' expr ')' statement ELSE statement   %prec ELSE    {$$=insertStmt(IFELSE, $3, NULL, $5, $7);}
+         | IF '(' expr ')' statement                  %prec IFX     {$$=insertStmt(IFELSE, $3, NULL, $5, NULL);}
+         | WHILE '(' expr ')' statement        {$$=insertStmt(WHILE_T, $3, NULL, $5, NULL);}
+         | PRINT '(' expr ')' ';'              {$$=insertStmt(PRINT_T, $3, NULL, NULL, NULL);}
+         | ID '[' expr ']' '=' expr ';'        {$$=insertStmt(STOREARRAY, $3, $6, NULL, NULL);}
+         | ID '=' expr ';'                     {$$=insertStmt(STORE, $3, NULL, NULL, NULL);}
+         | RETURN expr ';'                     {$$=insertStmt(RETURN_T, $2, NULL, NULL, NULL);}
+         | RETURN ';'                          {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL);};
 
-expr: exprindex				  %prec EXPR1REDUCE						{}
-	| exprindex '[' expr ']'  				                        {}
-	| exprnotindex													{};
+expr: exprindex				  %prec EXPR1REDUCE  {$$=$1;}
+	| exprindex '[' expr ']'  				     {$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
+	| exprnotindex								 {$$=$1;};
 
-exprindex: expr AND expr                                            {}
-     	 | expr OR expr                                             {}
-     	 | expr RELCOMPAR expr                                      {}
-     	 | expr EQUALITY expr                                       {}
-     	 | expr ADDITIVE expr                                       {}
-     	 | expr MULTIPLIC expr                                      {}
-     	 | ID                                                       {}
-     	 | INTLIT                                                   {}
-     	 | BOOLLIT                                                  {}
-     	 | '(' expr ')'                                             {}
-     	 | expr DOTLENGTH                                           {}
-     	 | '!' expr          %prec UNARY                            {}
-     	 | ADDITIVE expr     %prec UNARY                            {}
-     	 | PARSEINT '(' ID '[' expr ']' ')'                         {}
-     	 | ID '(' args ')'                                          {}
-     	 | ID '(' ')'                                               {};
+exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 | expr OR expr                     {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 | expr RELCOMPAR expr              {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 | expr EQUALITY expr               {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 | expr ADDITIVE expr               {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 | expr MULTIPLIC expr              {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 | ID                               {$$=insertExpr(ID_T, NULL, NULL, NULL, $1, NULL);}
+     	 | INTLIT                           {$$=insertExpr(INTLIT_T, NULL, NULL, NULL, $1, NULL);}
+     	 | BOOLLIT                          {$$=insertExpr(BOOLLIT_T, NULL, NULL, NULL, $1, NULL);}
+     	 | '(' expr ')'                     {$$=$2;}
+     	 | expr DOTLENGTH                   {$$=insertExpr(UNOP, "DOT", NULL, NULL, NULL, NULL);}
+     	 | '!' expr          %prec UNARY    {$$=insertExpr(UNOP, "!", NULL, NULL, NULL, NULL);}
+     	 | ADDITIVE expr     %prec UNARY    {$$=insertExpr(UNOP, $1, NULL, NULL, NULL, NULL);}
+     	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, NULL, $5, NULL, $3, NULL);}
+     	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, NULL, $3);}
+     	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, NULL, NULL);};
 
-exprnotindex: NEW INT '[' expr ']'                                  {}
-     		| NEW BOOL '[' expr ']'                                 {};
+exprnotindex: NEW INT '[' expr ']'       {$$=insertExpr(NEWINTARR, NULL, $4, NULL, NULL, NULL);}
+     		| NEW BOOL '[' expr ']'      {$$=insertExpr(NEWBOOLARR, NULL, $4, NULL, NULL, NULL);};
 
-args: expr argslist                                                 {}
-    | expr                                                          {};
+args: expr argslist                {$$=insertArg($1, $2);}
+    | expr                         {$$=insertArg($1, NULL);};
  
-argslist: ',' args                                                  {};
+argslist: ',' args                 {$$=$2;};
 
 %%
 

@@ -7,8 +7,8 @@
 typedef enum {VARDECL, METHODDECL} DeclType;
 typedef enum {VOID_T, INT_T, BOOL_T, INTARRAY, BOOLARRAY, STRINGARRAY} Type;
 typedef enum {IFELSE, RETURN_T, WHILE_T, PRINT_T, STORE, STOREARRAY} StmtType;
-typedef enum {BINOP, UNOP, PARENTHESIS, IDorLIT, CALL, PARSEINT_T} ExprType;
-typedef enum {PLUS, MINUS, MUL, DIV, REM, LESSER, GREATER, LEQ, GEQ, DIF, EQ, NOT, DOTLENGTH_T} OpType;
+typedef enum {BINOP, UNOP, ID_T, INTLIT_T, BOOLLIT_T, CALL, PARSEINT_T, INDEX, NEWINTARR, NEWBOOLARR} ExprType;
+typedef enum {PLUS, MINUS, MUL, DIV, REM, LESSER, GREATER, LEQ, GEQ, DIF, EQ, NOT, DOTLENGTH_T, AND_T, OR_T} OpType;
 
 ////
 // Nodes definitions.
@@ -28,19 +28,18 @@ typedef struct _expr
 struct _argsList
 {
 	Expr *expr;
-	struct _argsList *argsList;
+    struct _argsList *next;
 };
 
 typedef struct _stmt
 {
     StmtType type;
     Expr *expr1;
-    struct _stmt *stmt1;
+    struct _stmtList *stmt1;
     union
     {
         Expr *expr2;
-        struct _stmt *stmt2;
-        //struct _stmtList *stmtList;
+        struct _stmtList *stmt2;
     };
 } Stmt;
 
@@ -110,8 +109,11 @@ DeclList* insertDecl(DeclType, void*, DeclList*);
 VarDecl* insertFieldDecl(Type, char*, IDList*);
 VarDeclList* insertVarDecl(VarDeclList*, Type, char*, IDList*);
 IDList* insertID(char*, IDList*);
-StmtList* insertStmt(Stmt*, StmtList*);
+StmtList* insertStmtList(StmtList*, StmtList*);
+StmtList* insertStmt(StmtType, Expr*, Expr*, StmtList*, StmtList*);
 ParamList* insertFormalParam(Type, char*, ParamList*, int);
 MethodDecl* insertMethodDecl(Type, char*, ParamList*, VarDeclList*, StmtList*);
+Expr* insertExpr(ExprType, char*, Expr*, Expr*, char*, ArgsList*);
+ArgsList* insertArg(Expr*, ArgsList*);
 
 #endif

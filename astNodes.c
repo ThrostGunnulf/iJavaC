@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "astNodes.h"
 
 Class* insertClass(char* id, DeclList* declList)
@@ -81,16 +82,32 @@ IDList* insertID(char* id, IDList* list)
     return list;
 }
 
-StmtList* insertStmt(Stmt* stmt, StmtList* list)
+StmtList* insertStmtList(StmtList* stmt, StmtList* list)
 {
-    StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
-    newStmtList->stmt = stmt;
+    if(list == NULL)
+        return stmt;
 
     StmtList* aux = list;
     for(; aux->next != NULL; aux = aux->next);
-    aux->next = newStmtList;
+    aux->next = stmt;
 
     return list;
+}
+
+StmtList* insertStmt(StmtType type, Expr* expr1, Expr* expr2, StmtList* stmt1, StmtList* stmt2)
+{
+    Stmt* newStmt = (Stmt*) malloc(sizeof(Stmt));
+    newStmt->type = type;
+    newStmt->expr1 = expr1;
+    newStmt->expr2 = expr2;
+    newStmt->stmt1 = stmt1;
+    newStmt->stmt2 = stmt2;
+
+    StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
+    newStmtList->stmt = newStmt;
+    newStmtList->next = NULL;
+
+    return newStmtList;
 }
 
 ParamList* insertFormalParam(Type type, char* id, ParamList* list, int isHead)
@@ -122,4 +139,61 @@ MethodDecl* insertMethodDecl(Type type, char* id, ParamList* params, VarDeclList
     newMethodDecl->stmtList = stmts;
 
     return newMethodDecl;
+}
+
+OpType getOpType(char* op)
+{
+    if(strcmp(op, "&&") == 0)
+        return AND_T;
+    else if(strcmp(op, "||") == 0)
+        return OR_T;
+    else if(strcmp(op, "<") == 0)
+        return LESSER;
+    else if(strcmp(op, ">") == 0)
+        return GREATER;
+    else if(strcmp(op, "<=") == 0)
+        return LEQ;
+    else if(strcmp(op, ">=") == 0)
+        return GEQ;
+    else if(strcmp(op, "!=") == 0)
+        return DIF;
+    else if(strcmp(op, "==") == 0)
+        return EQ;
+    else if(strcmp(op, "!") == 0)
+        return NOT;
+    else if(strcmp(op, "+") == 0)
+        return PLUS;
+    else if(strcmp(op, "-") == 0)
+        return MINUS;
+    else if(strcmp(op, "*") == 0)
+        return MUL;
+    else if(strcmp(op, "/") == 0)
+        return DIV;
+    else if(strcmp(op, "%") == 0)
+        return REM;
+    else if(strcmp(op, "DOT") == 0)
+        return DOTLENGTH_T;
+}
+
+Expr* insertExpr(ExprType type, char* op, Expr* expr1, Expr* expr2, char* idOrLit, ArgsList* argsList)
+{
+    Expr* newExpr = (Expr*) malloc(sizeof(Expr));
+    newExpr->type = type;
+    if(op != NULL)
+        newExpr->op = getOpType(op);
+    newExpr->expr1 = expr1;
+    newExpr->expr2 = expr2;
+    newExpr->idOrLit = idOrLit;
+    newExpr->argsList = argsList;
+
+    return newExpr;
+}
+
+ArgsList* insertArg(Expr* expr, ArgsList* list)
+{
+    ArgsList* newArgList = (ArgsList*) malloc(sizeof(ArgsList));
+    newArgList->expr = expr;
+    newArgList->next = list;
+
+    return newArgList;
 }
