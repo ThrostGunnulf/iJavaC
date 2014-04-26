@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include "astNodes.h"
+#include "show.h"
 
 extern int prevLineNo;
 extern int prevColNo;
@@ -139,6 +140,9 @@ argslist: ',' args                 {$$=$2;};
 int main()
 {
 	yyparse();
+	printProgram(myProgram);
+	
+	//freeProgram(myProgram); //TO IMPLEMENT
     return 0;
 }
 
