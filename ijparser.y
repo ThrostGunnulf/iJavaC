@@ -37,7 +37,8 @@ Class* myProgram;
 %type <paramlist>	formalparams formalparamslist
 %type <vardecllist>	vardecl 
 %type <idlist>		idlist
-%type <stmtlist>	stmtlist statement
+%type <stmtlist>	stmtlist
+%type <stmt>		statement
 %type <expr>		expr exprindex exprnotindex
 %type <argslist> 	args argslist
 %type <type>		methodtype type
@@ -96,15 +97,15 @@ type: INT '[' ']'                         {$$=INTARRAY;}
     | INT                                 {$$=INT_T;}
     | BOOL                                {$$=BOOL_T;};
 
-statement: '{' stmtlist '}'                                         {$$=$2;}
-         | IF '(' expr ')' statement ELSE statement   %prec ELSE    {$$=insertStmt(IFELSE, $3, NULL, $5, $7);}
-         | IF '(' expr ')' statement                  %prec IFX     {$$=insertStmt(IFELSE, $3, NULL, $5, NULL);}
-         | WHILE '(' expr ')' statement        {$$=insertStmt(WHILE_T, $3, NULL, $5, NULL);}
-         | PRINT '(' expr ')' ';'              {$$=insertStmt(PRINT_T, $3, NULL, NULL, NULL);}
-         | ID '[' expr ']' '=' expr ';'        {$$=insertStmt(STOREARRAY, $3, $6, NULL, NULL);}
-         | ID '=' expr ';'                     {$$=insertStmt(STORE, $3, NULL, NULL, NULL);}
-         | RETURN expr ';'                     {$$=insertStmt(RETURN_T, $2, NULL, NULL, NULL);}
-         | RETURN ';'                          {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL);};
+statement: '{' stmtlist '}'              {$$=insertStmt(IFELSE, NULL, NULL, NULL, NULL, $2);}
+         | IF '(' expr ')' statement ELSE statement  %prec ELSE  {$$=insertStmt(IFELSE, $3, NULL, $5, $7, NULL);}
+         | IF '(' expr ')' statement                 %prec IFX   {$$=insertStmt(IFELSE, $3, NULL, $5, NULL, NULL);}
+         | WHILE '(' expr ')' statement  {$$=insertStmt(WHILE_T, $3, NULL, $5, NULL, NULL);}
+         | PRINT '(' expr ')' ';'        {$$=insertStmt(PRINT_T, $3, NULL, NULL, NULL, NULL);}
+         | ID '[' expr ']' '=' expr ';'  {$$=insertStmt(STOREARRAY, $3, $6, NULL, NULL, NULL);}
+         | ID '=' expr ';'               {$$=insertStmt(STORE, $3, NULL, NULL, NULL, NULL);}
+         | RETURN expr ';'               {$$=insertStmt(RETURN_T, $2, NULL, NULL, NULL, NULL);}
+         | RETURN ';'                    {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL, NULL);};
 
 expr: exprindex				  %prec EXPR1REDUCE  {$$=$1;}
 	| exprindex '[' expr ']'  				     {$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}

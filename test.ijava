@@ -1,10 +1,12 @@
 class teste
-{
-	static int manel;
-
+{	
+	static int ze;
+	
 	public static void main(String []argv)
 	{
-		int zeca;
+		int zeca, zequita;
+		boolean[] zecao, jose;
+		
 		zeca = (new int[5])[2];
 	}
 }

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "astNodes.h"
@@ -58,10 +59,10 @@ VarDeclList* insertVarDecl(VarDeclList* vardecl, Type type, char* id, IDList* li
 
     VarDeclList* newVarDeclList = (VarDeclList*) malloc(sizeof(VarDeclList*));
     newVarDeclList->varDecl = newVarDecl;
+    newVarDeclList->next = NULL;
 	
-	if(vardecl==NULL) {
+    if(vardecl==NULL)
         return newVarDeclList;
-	}
 
 	VarDeclList* aux = vardecl;
 	for(; aux->next != NULL; aux = aux->next);
@@ -74,6 +75,10 @@ IDList* insertID(char* id, IDList* list)
 {
     IDList* newID = (IDList*) malloc(sizeof(IDList));
     newID->id = id;
+    newID->next = NULL;
+
+    if(list == NULL)
+        return newID;
 
     IDList *aux = list;
     for(; aux->next != NULL; aux = aux->next);
@@ -82,19 +87,23 @@ IDList* insertID(char* id, IDList* list)
     return list;
 }
 
-StmtList* insertStmtList(StmtList* stmt, StmtList* list)
+StmtList* insertStmtList(Stmt* stmt, StmtList* list)
 {
+    StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
+    newStmtList->stmt = stmt;
+    newStmtList->next = NULL;
+
     if(list == NULL)
-        return stmt;
+        return newStmtList;
 
     StmtList* aux = list;
     for(; aux->next != NULL; aux = aux->next);
-    aux->next = stmt;
+    aux->next = newStmtList;
 
     return list;
 }
 
-StmtList* insertStmt(StmtType type, Expr* expr1, Expr* expr2, StmtList* stmt1, StmtList* stmt2)
+Stmt* insertStmt(StmtType type, Expr* expr1, Expr* expr2, Stmt* stmt1, Stmt* stmt2, StmtList* stmtList)
 {
     Stmt* newStmt = (Stmt*) malloc(sizeof(Stmt));
     newStmt->type = type;
@@ -102,12 +111,9 @@ StmtList* insertStmt(StmtType type, Expr* expr1, Expr* expr2, StmtList* stmt1, S
     newStmt->expr2 = expr2;
     newStmt->stmt1 = stmt1;
     newStmt->stmt2 = stmt2;
+    newStmt->stmtList = stmtList;
 
-    StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
-    newStmtList->stmt = newStmt;
-    newStmtList->next = NULL;
-
-    return newStmtList;
+    return newStmt;
 }
 
 ParamList* insertFormalParam(Type type, char* id, ParamList* list, int isHead)
@@ -115,6 +121,7 @@ ParamList* insertFormalParam(Type type, char* id, ParamList* list, int isHead)
     ParamList* newParam = (ParamList*) malloc(sizeof(ParamList));
     newParam->type = type;
     newParam->id = id;
+    newParam->next = NULL;
 
     if(isHead)
     {
