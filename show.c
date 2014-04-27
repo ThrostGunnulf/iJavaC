@@ -5,6 +5,8 @@
 
 #define TYPE_SIZE 20
 
+////
+// Abstract Syntax Tree
 void printDeclList(DeclList*);
 void printFieldDecl(VarDecl*);
 void printMethodDecl(MethodDecl*);
@@ -287,4 +289,13 @@ void typeToString(Type type, char* dest)
     else if(type == STRINGARRAY)
         sprintf(dest, "%s", "StringArray");
 
+}
+
+
+////
+// Symbol Tables
+
+void printSymbolTables(ClassTable* table)
+{
+    printf("NOT YET IMPLEMENTED\n");
 }
