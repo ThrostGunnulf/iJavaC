@@ -103,10 +103,11 @@ StmtList* insertStmtList(Stmt* stmt, StmtList* list)
     return list;
 }
 
-Stmt* insertStmt(StmtType type, Expr* expr1, Expr* expr2, Stmt* stmt1, Stmt* stmt2, StmtList* stmtList)
+Stmt* insertStmt(StmtType type, char* id, Expr* expr1, Expr* expr2, Stmt* stmt1, Stmt* stmt2, StmtList* stmtList)
 {
     Stmt* newStmt = (Stmt*) malloc(sizeof(Stmt));
     newStmt->type = type;
+    newStmt->id = id;
     newStmt->expr1 = expr1;
     newStmt->expr2 = expr2;
     newStmt->stmt1 = stmt1;

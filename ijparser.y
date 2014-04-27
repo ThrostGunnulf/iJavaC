@@ -97,15 +97,15 @@ type: INT '[' ']'                         {$$=INTARRAY;}
     | INT                                 {$$=INT_T;}
     | BOOL                                {$$=BOOL_T;};
 
-statement: '{' stmtlist '}'              {$$=insertStmt(IFELSE, NULL, NULL, NULL, NULL, $2);}
-         | IF '(' expr ')' statement ELSE statement  %prec ELSE  {$$=insertStmt(IFELSE, $3, NULL, $5, $7, NULL);}
-         | IF '(' expr ')' statement                 %prec IFX   {$$=insertStmt(IFELSE, $3, NULL, $5, NULL, NULL);}
-         | WHILE '(' expr ')' statement  {$$=insertStmt(WHILE_T, $3, NULL, $5, NULL, NULL);}
-         | PRINT '(' expr ')' ';'        {$$=insertStmt(PRINT_T, $3, NULL, NULL, NULL, NULL);}
-         | ID '[' expr ']' '=' expr ';'  {$$=insertStmt(STOREARRAY, $3, $6, NULL, NULL, NULL);}
-         | ID '=' expr ';'               {$$=insertStmt(STORE, $3, NULL, NULL, NULL, NULL);}
-         | RETURN expr ';'               {$$=insertStmt(RETURN_T, $2, NULL, NULL, NULL, NULL);}
-         | RETURN ';'                    {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL, NULL);};
+statement: '{' stmtlist '}'            {$$=insertStmt(CSTAT, NULL, NULL, NULL, NULL, NULL, $2);}
+         | IF '(' expr ')' statement ELSE statement  %prec ELSE  {$$=insertStmt(IFELSE, NULL, $3, NULL, $5, $7, NULL);}
+         | IF '(' expr ')' statement                 %prec IFX   {$$=insertStmt(IFELSE, NULL, $3, NULL, $5, NULL, NULL);}
+         | WHILE '(' expr ')' statement  {$$=insertStmt(WHILE_T, NULL, $3, NULL, $5, NULL, NULL);}
+         | PRINT '(' expr ')' ';'      {$$=insertStmt(PRINT_T, NULL, $3, NULL, NULL, NULL, NULL);}
+         | ID '[' expr ']' '=' expr ';' {$$=insertStmt(STOREARRAY, $1, $3, $6, NULL, NULL, NULL);}
+         | ID '=' expr ';'              {$$=insertStmt(STORE, $1, $3, NULL, NULL, NULL, NULL);}
+         | RETURN expr ';'         {$$=insertStmt(RETURN_T, NULL, $2, NULL, NULL, NULL, NULL);}
+         | RETURN ';'              {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL, NULL, NULL);};
 
 expr: exprindex				  %prec EXPR1REDUCE  {$$=$1;}
 	| exprindex '[' expr ']'  				     {$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
@@ -124,7 +124,7 @@ exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NU
      	 | expr DOTLENGTH                   {$$=insertExpr(UNOP, "DOT", NULL, NULL, NULL, NULL);}
      	 | '!' expr          %prec UNARY    {$$=insertExpr(UNOP, "!", NULL, NULL, NULL, NULL);}
      	 | ADDITIVE expr     %prec UNARY    {$$=insertExpr(UNOP, $1, NULL, NULL, NULL, NULL);}
-     	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, NULL, $5, NULL, $3, NULL);}
+     	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, $3, $5, NULL, $3, NULL);}
      	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, NULL, $3);}
      	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, NULL, NULL);};
 
