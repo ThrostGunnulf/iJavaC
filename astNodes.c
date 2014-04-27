@@ -52,12 +52,12 @@ VarDeclList* insertVarDecl(VarDeclList* vardecl, Type type, char* id, IDList* li
     newId->id = id;
     newId->next = list;
 	
-	VarDecl* newVarDecl = (VarDecl*) malloc(sizeof(VarDecl*));
+    VarDecl* newVarDecl = (VarDecl*) malloc(sizeof(VarDecl));
 	newVarDecl->type = type;
 	newVarDecl->isStatic = 0;
 	newVarDecl->idList = newId;
 
-    VarDeclList* newVarDeclList = (VarDeclList*) malloc(sizeof(VarDeclList*));
+    VarDeclList* newVarDeclList = (VarDeclList*) malloc(sizeof(VarDeclList));
     newVarDeclList->varDecl = newVarDecl;
     newVarDeclList->next = NULL;
 	
@@ -189,6 +189,8 @@ Expr* insertExpr(ExprType type, char* op, Expr* expr1, Expr* expr2, char* idOrLi
     newExpr->type = type;
     if(op != NULL)
         newExpr->op = getOpType(op);
+    else
+        newExpr->op = -1;
     newExpr->expr1 = expr1;
     newExpr->expr2 = expr2;
     newExpr->idOrLit = idOrLit;

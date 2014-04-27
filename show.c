@@ -3,7 +3,7 @@
 #include <string.h>
 #include "show.h"
 
-#define TYPE_SIZE 15
+#define TYPE_SIZE 20
 
 void printDeclList(DeclList*);
 void printFieldDecl(VarDecl*);
@@ -59,7 +59,10 @@ void printMethodDecl(MethodDecl* decl)
     printf("\tMethodDecl\n");
     printf("\t\t%s\n", type);
     printf("\t\tId(%s)\n", decl->id);
-    printMethodParams(decl->paramList);
+    if(decl->paramList)
+        printMethodParams(decl->paramList);
+    else
+        printf("\t\tNULL\n");
     printf("\t\tMethodBody\n");
     printVarDeclList(decl->varDeclList);
     printStmtList(decl->stmtList, 3);
@@ -108,7 +111,7 @@ void printStmtList(StmtList* stmts, int depth)
 void printStmt(Stmt* stmt, int depth)
 {
     int newDepth = depth +1;
-    char* tabs = (char*) malloc((depth+1) * sizeof(char));
+    char* tabs = (char*) calloc(depth+1, sizeof(char));
     memset(tabs, '\t', depth * sizeof(char));
 
     if(stmt == NULL)
@@ -149,13 +152,13 @@ void printStmt(Stmt* stmt, int depth)
     else if(stmt->type == STORE)
     {
         printf("%sStore\n", tabs);
-        printf("%s\t%s\n", tabs, stmt->id);
+        printf("%s\tId(%s)\n", tabs, stmt->id);
         printExpr(stmt->expr1, newDepth);
     }
     else if(stmt->type == STOREARRAY)
     {
         printf("%sStoreArray\n", tabs);
-        printf("%s\t%s\n", tabs, stmt->id);
+        printf("%s\tId(%s)\n", tabs, stmt->id);
         printExpr(stmt->expr1, newDepth);
         printExpr(stmt->expr2, newDepth);
     }
@@ -166,7 +169,7 @@ void printStmt(Stmt* stmt, int depth)
 void printExpr(Expr* expr, int depth)
 {
     int newDepth = depth +1;
-    char* tabs = (char*) malloc((depth+1) * sizeof(char));
+    char* tabs = (char*) calloc(depth+1, sizeof(char));
     memset(tabs, '\t', depth * sizeof(char));
 
     if(expr->type == BINOP)
@@ -222,7 +225,7 @@ void printExpr(Expr* expr, int depth)
 
 void printOp(OpType op, ExprType exprType, int depth)
 {
-    char* tabs = (char*) malloc((depth+1) * sizeof(char));
+    char* tabs = (char*) calloc(depth+1, sizeof(char));
     memset(tabs, '\t', depth * sizeof(char));
 
     if(op == OR_T)

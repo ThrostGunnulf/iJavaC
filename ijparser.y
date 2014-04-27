@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include "astNodes.h"
 #include "show.h"
+#include "symbols.h"
 
 extern int prevLineNo;
 extern int prevColNo;
 extern char *yytext;
 
-Class* myProgram;
+Class* myProgram = NULL;
+ClassTable* symbolsTable = NULL;
 %}
 
 %union
@@ -142,6 +144,7 @@ int main()
 {
 	yyparse();
 	printProgram(myProgram);
+	symbolsTable = buildSymbolsTables(myProgram);
 	
 	//freeProgram(myProgram); //TO IMPLEMENT
     return 0;
