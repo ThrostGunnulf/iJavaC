@@ -203,6 +203,7 @@ void printExpr(Expr* expr, int depth)
     else if(expr->type == PARSEINT_T)
     {
         printf("%sParseArgs\n", tabs);
+        printf("%s\tId(%s)\n", tabs, expr->idOrLit);
         printExpr(expr->expr1, newDepth);
     }
     else if(expr->type == INDEX)

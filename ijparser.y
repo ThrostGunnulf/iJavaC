@@ -145,15 +145,24 @@ int main(int argc, char *argv[])
 	yyparse();
 	//symbolsTable = buildSymbolsTables(myProgram);
 	
-	int i, printSymbols;
+	int i, printTree, printSymbols;
+	printTree = printSymbols = 0;
 	for(i=0; i < argc; i++)
+	{
 		if(strcmp(argv[i], "-s") == 0)
 		{
 			printSymbols = 1;
 			break;
 		}
+		else if(strcmp(argv[i], "-t") == 0)
+		{
+			printTree = 1;
+			break;
+		}
+	}
 	
-	printProgram(myProgram);
+	if(printTree)
+		printProgram(myProgram);
 	/*if(printSymbols)
 		printSymbolTables(symbolsTable);*/
 	
