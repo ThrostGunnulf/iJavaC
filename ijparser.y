@@ -143,7 +143,7 @@ argslist: ',' args                 {$$=$2;};
 int main(int argc, char *argv[])
 {
 	yyparse();
-	symbolsTable = buildSymbolsTables(myProgram);
+	//symbolsTable = buildSymbolsTables(myProgram);
 	
 	int i, printSymbols;
 	for(i=0; i < argc; i++)
@@ -154,8 +154,8 @@ int main(int argc, char *argv[])
 		}
 	
 	printProgram(myProgram);
-	if(printSymbols)
-		printSymbolTables(symbolsTable);
+	/*if(printSymbols)
+		printSymbolTables(symbolsTable);*/
 	
 	//freeProgram(myProgram, symbolsTable); //TO IMPLEMENT
     return 0;
