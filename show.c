@@ -359,7 +359,7 @@ void typeToStringST(Type type, char* dest)
     else if(type == INTARRAY)
         sprintf(dest, "%s", "int[]");
     else if(type == BOOLARRAY)
-        sprintf(dest, "%s", "bool[]");
+        sprintf(dest, "%s", "boolean[]");
     else if(type == VOID_T)
         sprintf(dest, "%s", "void");
     else if(type == STRINGARRAY)

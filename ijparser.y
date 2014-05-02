@@ -112,7 +112,6 @@ statement: '{' stmtlist '}'           {$$=insertStmt(CSTAT, NULL, NULL, NULL, NU
          | RETURN ';'              {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL, NULL, NULL);};
 
 expr: exprindex				  %prec EXPR1REDUCE  {$$=$1;}
-	| exprindex '[' expr ']'  				     {$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
 	| exprnotindex								 {$$=$1;};
 
 exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
@@ -131,6 +130,7 @@ exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NU
      	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, $3, $5, NULL, $3, NULL);}
      	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, $1, $3);}
      	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, $1, NULL);};
+		 | exprindex '[' expr ']'  			{$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
 
 exprnotindex: NEW INT '[' expr ']'       {$$=insertExpr(NEWINTARR, NULL, $4, NULL, NULL, NULL);}
      		| NEW BOOL '[' expr ']'      {$$=insertExpr(NEWBOOLARR, NULL, $4, NULL, NULL, NULL);};
@@ -157,12 +157,10 @@ int main(int argc, char *argv[])
 		if(strcmp(argv[i], "-s") == 0)
 		{
 			printSymbols = 1;
-			break;
 		}
 		else if(strcmp(argv[i], "-t") == 0)
 		{
 			printTree = 1;
-			break;
 		}
 	}
 	

@@ -41,7 +41,7 @@ ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
     tableEntry->type = decl->type;
     tableEntry->next = NULL;
 
-    ClassTableEntry* last = NULL;
+    ClassTableEntry* last = tableEntry;
     IDList* aux = decl->idList->next;
     for(; aux != NULL; aux = aux->next)
     {

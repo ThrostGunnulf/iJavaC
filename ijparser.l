@@ -53,8 +53,8 @@ dec             [0-9]
 ".length"                               {colCount(yyleng); return DOTLENGTH;}
 "return"                                {colCount(yyleng); return RETURN;}
 "("|")"|"{"|"}"|"["|"]"|"!"|"="|";"|"," {colCount(yyleng); return yytext[0];}
-"&&"                                    {colCount(yyleng); return AND;}
-"||"                                    {colCount(yyleng); return OR;}
+"&&"                                    {colCount(yyleng); yylval.token = strdup(yytext); return AND;}
+"||"                                    {colCount(yyleng); yylval.token = strdup(yytext); return OR;}
 "<"|">"|"<="|">="                       {colCount(yyleng); yylval.token = strdup(yytext); return RELCOMPAR;}
 "!="|"=="                               {colCount(yyleng); yylval.token = strdup(yytext); return EQUALITY;}
 "+"|"-"              					{colCount(yyleng); yylval.token = strdup(yytext); return ADDITIVE;}
