@@ -16,6 +16,8 @@ ClassTable* buildSymbolsTables(Class* myProgram)
     for(; aux != NULL; aux = aux->next)
     {
         ClassTableEntry* newEntry = (ClassTableEntry*) malloc(sizeof(ClassTableEntry));
+        newEntry->methodTable = NULL;
+        newEntry->next = NULL;
         end = newEntry;
         if(aux->type == VARDECL)
             end = newVarEntries(aux->varDecl, newEntry);
@@ -46,12 +48,15 @@ ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
         ClassTableEntry* newEntry = (ClassTableEntry*) malloc(sizeof(ClassTableEntry));
         newEntry->id = aux->id;
         newEntry->type = decl->type;
+        newEntry->methodTable = NULL;
         newEntry->next = NULL;
 
-        if(tableEntry->next = NULL)
+        if(tableEntry->next == NULL)
             tableEntry->next = newEntry;
         else
             last->next = newEntry;
+
+        last = newEntry;
     }
 
     return last;
@@ -116,9 +121,10 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
             newEntry2->next = NULL;
 
             last2->next = newEntry2;
+            last2 = newEntry2;
         }
-
         end = last2;
+
 
         if(methodTable->entries == NULL)
             methodTable->entries = newEntry;

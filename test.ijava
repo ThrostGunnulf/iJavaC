@@ -1,18 +1,35 @@
 class gcd {
-	public static void main(String[] args) {
-		int[] x;
-		x = new int[2];
-		x[0] = Integer.parseInt(args[0]);
-		x[1] = Integer.parseInt(args[1]);
-		if (x[0] == 0)
-			System.out.println(x[1]);
+	static int a, b;
+	public static void main(String[] args) {}
+	public static void test3(String[] args) {}
+	public static void test2() {}
+	public static int test(int a, boolean b, int[] a1, boolean[] b2)
+	{
+		int a;
+		boolean b, c;
+		int[] d, e;
+		boolean[] f, g, h;
+		
+		{
+		if(4)
+		{
+			System.out.println(2);
+			System.out.println(a);
+			System.out.println(a[2]);
+		}
 		else
-			while (x[1] > 0) {
-				if (x[0] > x[1])
-					x[0] = x[0] - x[1];
-				else
-					x[1] = x[1] - x[0];
+			{}
+		
+		while(1)
+			while(2)
+			{
+				while(3)
+					{}
 			}
-		System.out.println(x[0]);
+		}
+		
+		return 3;
+		return a;
+		return;		
 	}
 }

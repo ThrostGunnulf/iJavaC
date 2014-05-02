@@ -89,6 +89,9 @@ IDList* insertID(char* id, IDList* list)
 
 StmtList* insertStmtList(Stmt* stmt, StmtList* list)
 {
+    if(!stmt)
+        return list;
+
     StmtList* newStmtList = (StmtList*) malloc(sizeof(StmtList));
     newStmtList->stmt = stmt;
     newStmtList->next = NULL;
@@ -105,6 +108,14 @@ StmtList* insertStmtList(Stmt* stmt, StmtList* list)
 
 Stmt* insertStmt(StmtType type, char* id, Expr* expr1, Expr* expr2, Stmt* stmt1, Stmt* stmt2, StmtList* stmtList)
 {
+    if(type == CSTAT)
+    {
+        if(stmtList == NULL)
+            return NULL;
+        else if(stmtList->next == NULL)
+            return stmtList->stmt;
+    }
+
     Stmt* newStmt = (Stmt*) malloc(sizeof(Stmt));
     newStmt->type = type;
     newStmt->id = id;
@@ -124,7 +135,7 @@ ParamList* insertFormalParam(Type type, char* id, ParamList* list, int isHead)
     newParam->id = id;
     newParam->next = NULL;
 
-    if(isHead)
+    if(isHead || !list)
     {
         newParam->next = list;
         return newParam;
@@ -144,6 +155,14 @@ MethodDecl* insertMethodDecl(Type type, char* id, ParamList* params, VarDeclList
     newMethodDecl->id = id;
     newMethodDecl->paramList = params;
     newMethodDecl->varDeclList = decls;
+
+    if(stmts && stmts->stmt->type == CSTAT && stmts->next == NULL)
+    {
+        StmtList* old = stmts;
+        stmts = stmts->stmt->stmtList;
+        free(old);
+    }
+
     newMethodDecl->stmtList = stmts;
 
     return newMethodDecl;
@@ -181,6 +200,8 @@ OpType getOpType(char* op)
         return REM;
     else if(strcmp(op, "DOT") == 0)
         return DOTLENGTH_T;
+
+    return -1;
 }
 
 Expr* insertExpr(ExprType type, char* op, Expr* expr1, Expr* expr2, char* idOrLit, ArgsList* argsList)

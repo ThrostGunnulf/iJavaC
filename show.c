@@ -6,6 +6,11 @@
 #define TYPE_SIZE 20
 
 ////
+// Utilities
+void typeToString(Type, char*);
+void typeToStringST(Type, char*);
+
+////
 // Abstract Syntax Tree
 void printDeclList(DeclList*);
 void printFieldDecl(VarDecl*);
@@ -16,17 +21,17 @@ void printStmtList(StmtList*, int);
 void printStmt(Stmt*, int);
 void printExpr(Expr*, int);
 void printOp(OpType, ExprType, int);
-void typeToString(Type, char*);
 
 void printProgram(Class* myProgram)
 {
+    if(!myProgram)
+        return;
+
     printf("Program\n");
-    printf("\tId(%s)\n", myProgram->id);
+    printf("  Id(%s)\n", myProgram->id);
 
     if(myProgram->declList != NULL)
         printDeclList(myProgram->declList);
-    else
-        printf("\tNULL\n");
 }
 
 void printDeclList(DeclList* list)
@@ -43,14 +48,14 @@ void printDeclList(DeclList* list)
 
 void printFieldDecl(VarDecl* decl)
 {
-    char toPrint[40], type[TYPE_SIZE];
+    char type[TYPE_SIZE];
 
     typeToString(decl->type, type);
-    sprintf(toPrint, "\tVarDecl\n\t\tStatic %s\n", type);
+    printf("  VarDecl\n    %s\n", type);
 
     IDList* aux = decl->idList;
     for(; aux != NULL; aux = aux->next)
-        printf("%s\t\tId(%s)\n", toPrint, aux->id);
+        printf("    Id(%s)\n", aux->id);
 }
 
 void printMethodDecl(MethodDecl* decl)
@@ -58,30 +63,27 @@ void printMethodDecl(MethodDecl* decl)
     char type[TYPE_SIZE];
     typeToString(decl->type, type);
 
-    printf("\tMethodDecl\n");
-    printf("\t\t%s\n", type);
-    printf("\t\tId(%s)\n", decl->id);
-    if(decl->paramList)
-        printMethodParams(decl->paramList);
-    else
-        printf("\t\tNULL\n");
-    printf("\t\tMethodBody\n");
+    printf("  MethodDecl\n");
+    printf("    %s\n", type);
+    printf("    Id(%s)\n", decl->id);
+    printMethodParams(decl->paramList);
+    printf("    MethodBody\n");
     printVarDeclList(decl->varDeclList);
     printStmtList(decl->stmtList, 3);
 }
 
 void printMethodParams(ParamList* params)
 {
-    printf("\t\tMethodParams\n");
+    printf("    MethodParams\n");
 
     char type[TYPE_SIZE];
     ParamList* aux = params;
     for(; aux != NULL; aux = aux->next)
     {
-        printf("\t\t\tParamDeclaration\n");
+        printf("      ParamDeclaration\n");
         typeToString(aux->type, type);
-        printf("\t\t\t\t%s\n", type);
-        printf("\t\t\t\tId(%s)\n", aux->id);
+        printf("        %s\n", type);
+        printf("        Id(%s)\n", aux->id);
     }
 }
 
@@ -93,12 +95,13 @@ void printVarDeclList(VarDeclList* decls)
     for(; aux != NULL; aux = aux->next)
     {
         typeToString(aux->varDecl->type, type);
+        printf("      VarDecl\n");
+        printf("        %s\n", type);
+
         IDList* aux2 = aux->varDecl->idList;
         for(; aux2 != NULL; aux2 = aux2->next)
         {
-            printf("\t\t\tVarDecl\n");
-            printf("\t\t\t\t%s\n", type);
-            printf("\t\t\t\tId(%s)\n", aux2->id);
+            printf("        Id(%s)\n", aux2->id);
         }
     }
 }
@@ -113,8 +116,8 @@ void printStmtList(StmtList* stmts, int depth)
 void printStmt(Stmt* stmt, int depth)
 {
     int newDepth = depth +1;
-    char* tabs = (char*) calloc(depth+1, sizeof(char));
-    memset(tabs, '\t', depth * sizeof(char));
+    char* tabs = (char*) calloc(2*depth+1, sizeof(char));
+    memset(tabs, ' ', 2*depth * sizeof(char));
 
     if(stmt == NULL)
     {
@@ -124,7 +127,7 @@ void printStmt(Stmt* stmt, int depth)
 
     if(stmt->type == CSTAT)
     {
-        printf("%sCoumpoundStat\n", tabs);
+        printf("%sCompoundStat\n", tabs);
         printStmtList(stmt->stmtList, newDepth);
     }
     else if(stmt->type == IFELSE)
@@ -154,13 +157,13 @@ void printStmt(Stmt* stmt, int depth)
     else if(stmt->type == STORE)
     {
         printf("%sStore\n", tabs);
-        printf("%s\tId(%s)\n", tabs, stmt->id);
+        printf("%s  Id(%s)\n", tabs, stmt->id);
         printExpr(stmt->expr1, newDepth);
     }
     else if(stmt->type == STOREARRAY)
     {
         printf("%sStoreArray\n", tabs);
-        printf("%s\tId(%s)\n", tabs, stmt->id);
+        printf("%s  Id(%s)\n", tabs, stmt->id);
         printExpr(stmt->expr1, newDepth);
         printExpr(stmt->expr2, newDepth);
     }
@@ -171,18 +174,18 @@ void printStmt(Stmt* stmt, int depth)
 void printExpr(Expr* expr, int depth)
 {
     int newDepth = depth +1;
-    char* tabs = (char*) calloc(depth+1, sizeof(char));
-    memset(tabs, '\t', depth * sizeof(char));
+    char* tabs = (char*) calloc(2*depth+1, sizeof(char));
+    memset(tabs, ' ', 2*depth * sizeof(char));
 
     if(expr->type == BINOP)
     {
-        printOp(expr->op, expr->type, newDepth);
+        printOp(expr->op, expr->type, depth);
         printExpr(expr->expr1, newDepth);
         printExpr(expr->expr2, newDepth);
     }
     else if(expr->type == UNOP)
     {
-        printOp(expr->op, expr->type, newDepth);
+        printOp(expr->op, expr->type, depth);
         printExpr(expr->expr1, newDepth);
     }
     else if(expr->type == ID_T)
@@ -194,7 +197,7 @@ void printExpr(Expr* expr, int depth)
     else if(expr->type == CALL)
     {
         printf("%sCall\n", tabs);
-        printf("%s\tId(%s)\n", tabs, expr->idOrLit);
+        printf("%s  Id(%s)\n", tabs, expr->idOrLit);
 
         ArgsList* aux = expr->argsList;
         for(; aux != NULL; aux = aux->next)
@@ -203,7 +206,7 @@ void printExpr(Expr* expr, int depth)
     else if(expr->type == PARSEINT_T)
     {
         printf("%sParseArgs\n", tabs);
-        printf("%s\tId(%s)\n", tabs, expr->idOrLit);
+        printf("%s  Id(%s)\n", tabs, expr->idOrLit);
         printExpr(expr->expr1, newDepth);
     }
     else if(expr->type == INDEX)
@@ -228,8 +231,8 @@ void printExpr(Expr* expr, int depth)
 
 void printOp(OpType op, ExprType exprType, int depth)
 {
-    char* tabs = (char*) calloc(depth+1, sizeof(char));
-    memset(tabs, '\t', depth * sizeof(char));
+    char* tabs = (char*) calloc(2*depth+1, sizeof(char));
+    memset(tabs, ' ', 2*depth * sizeof(char));
 
     if(op == OR_T)
         printf("%sOr\n", tabs);
@@ -275,6 +278,62 @@ void printOp(OpType op, ExprType exprType, int depth)
     free(tabs);
 }
 
+
+////
+// Symbol Tables
+void printMethodTable(ClassTableEntry*);
+
+void printSymbolTables(ClassTable* table)
+{
+    printf("===== Class %s Symbol Table =====\n", table->id);
+
+    ////
+    // Class Symbol Table.
+    char type[TYPE_SIZE];
+    ClassTableEntry* aux = table->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->methodTable == NULL) //Variable
+        {
+            typeToStringST(aux->type, type);
+            printf("%s\t%s\n", aux->id, type);
+        }
+        else //Method
+            printf("%s\tmethod\n", aux->id);
+    }
+
+
+    ////
+    // Method Symbol Tables.
+    aux = table->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->methodTable != NULL) //Method
+            printMethodTable(aux);
+    }
+}
+
+void printMethodTable(ClassTableEntry* table)
+{
+    char type[TYPE_SIZE];
+    typeToStringST(table->type, type);
+
+    printf("\n===== Method %s Symbol Table =====\n", table->id);
+    printf("return\t%s\n", type);
+
+    MethodTableEntry* aux = table->methodTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        typeToStringST(aux->type, type);
+        printf("%s\t%s", aux->id, type);
+        if(aux->isParam)
+            printf("\tparam");
+        printf("\n");
+    }
+}
+
+////
+// Utilities.
 void typeToString(Type type, char* dest)
 {
     if(type == INT_T)
@@ -289,14 +348,20 @@ void typeToString(Type type, char* dest)
         sprintf(dest, "%s", "Void");
     else if(type == STRINGARRAY)
         sprintf(dest, "%s", "StringArray");
-
 }
 
-
-////
-// Symbol Tables
-
-void printSymbolTables(ClassTable* table)
+void typeToStringST(Type type, char* dest)
 {
-    printf("NOT YET IMPLEMENTED\n");
+    if(type == INT_T)
+        sprintf(dest, "%s", "int");
+    else if(type == BOOL_T)
+        sprintf(dest, "%s", "boolean");
+    else if(type == INTARRAY)
+        sprintf(dest, "%s", "int[]");
+    else if(type == BOOLARRAY)
+        sprintf(dest, "%s", "bool[]");
+    else if(type == VOID_T)
+        sprintf(dest, "%s", "void");
+    else if(type == STRINGARRAY)
+        sprintf(dest, "%s", "String[]");
 }

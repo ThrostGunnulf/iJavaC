@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <string.h>
 #include "astNodes.h"
 #include "show.h"
 #include "symbols.h"
@@ -8,6 +9,7 @@ extern int prevLineNo;
 extern int prevColNo;
 extern char *yytext;
 
+int error = 0;
 Class* myProgram = NULL;
 ClassTable* symbolsTable = NULL;
 %}
@@ -88,7 +90,7 @@ formalparamslist: formalparamslist ',' type ID   {$$=insertFormalParam($3, $4, $
 stmtlist: stmtlist statement              {$$=insertStmtList($2, $1);}
         | 								  {$$=NULL;};
 
-vardecl: vardecl type ID idlist ';'  	  {$$=insertVarDecl($1 ,$2, $3, $4);}
+vardecl: vardecl type ID idlist ';'  	  {$$=insertVarDecl($1, $2, $3, $4);}
 	   | 								  {$$=NULL;};
 
 idlist: idlist ',' ID          	  		  {$$=insertID($3, $1);}
@@ -99,7 +101,7 @@ type: INT '[' ']'                         {$$=INTARRAY;}
     | INT                                 {$$=INT_T;}
     | BOOL                                {$$=BOOL_T;};
 
-statement: '{' stmtlist '}'            {$$=insertStmt(CSTAT, NULL, NULL, NULL, NULL, NULL, $2);}
+statement: '{' stmtlist '}'           {$$=insertStmt(CSTAT, NULL, NULL, NULL, NULL, NULL, $2);}
          | IF '(' expr ')' statement ELSE statement  %prec ELSE  {$$=insertStmt(IFELSE, NULL, $3, NULL, $5, $7, NULL);}
          | IF '(' expr ')' statement                 %prec IFX   {$$=insertStmt(IFELSE, NULL, $3, NULL, $5, NULL, NULL);}
          | WHILE '(' expr ')' statement  {$$=insertStmt(WHILE_T, NULL, $3, NULL, $5, NULL, NULL);}
@@ -123,12 +125,12 @@ exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NU
      	 | INTLIT                           {$$=insertExpr(INTLIT_T, NULL, NULL, NULL, $1, NULL);}
      	 | BOOLLIT                          {$$=insertExpr(BOOLLIT_T, NULL, NULL, NULL, $1, NULL);}
      	 | '(' expr ')'                     {$$=$2;}
-     	 | expr DOTLENGTH                   {$$=insertExpr(UNOP, "DOT", NULL, NULL, NULL, NULL);}
-     	 | '!' expr          %prec UNARY    {$$=insertExpr(UNOP, "!", NULL, NULL, NULL, NULL);}
-     	 | ADDITIVE expr     %prec UNARY    {$$=insertExpr(UNOP, $1, NULL, NULL, NULL, NULL);}
+     	 | expr DOTLENGTH                   {$$=insertExpr(UNOP, "DOT", $1, NULL, NULL, NULL);}
+     	 | '!' expr          %prec UNARY    {$$=insertExpr(UNOP, "!", $2, NULL, NULL, NULL);}
+     	 | ADDITIVE expr     %prec UNARY    {$$=insertExpr(UNOP, $1, $2, NULL, NULL, NULL);}
      	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, $3, $5, NULL, $3, NULL);}
-     	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, NULL, $3);}
-     	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, NULL, NULL);};
+     	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, $1, $3);}
+     	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, $1, NULL);};
 
 exprnotindex: NEW INT '[' expr ']'       {$$=insertExpr(NEWINTARR, NULL, $4, NULL, NULL, NULL);}
      		| NEW BOOL '[' expr ']'      {$$=insertExpr(NEWBOOLARR, NULL, $4, NULL, NULL, NULL);};
@@ -143,7 +145,10 @@ argslist: ',' args                 {$$=$2;};
 int main(int argc, char *argv[])
 {
 	yyparse();
-	//symbolsTable = buildSymbolsTables(myProgram);
+	if(error)
+		return 0;
+	
+	symbolsTable = buildSymbolsTables(myProgram);
 	
 	int i, printTree, printSymbols;
 	printTree = printSymbols = 0;
@@ -163,11 +168,16 @@ int main(int argc, char *argv[])
 	
 	if(printTree)
 		printProgram(myProgram);
-	/*if(printSymbols)
-		printSymbolTables(symbolsTable);*/
+	if(printSymbols)
+		printSymbolTables(symbolsTable);
 	
 	//freeProgram(myProgram, symbolsTable); //TO IMPLEMENT
     return 0;
 }
 
-int yyerror(char *s) {printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);}
+int yyerror(char *s)
+{
+	printf("Line %d, col %d: %s: %s\n", prevLineNo, prevColNo, s, yytext);
+	error=1;
+	return -1;
+}
