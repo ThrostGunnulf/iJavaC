@@ -1,10 +1,5 @@
-class gcd {
+class gcd
+{
 	static int a;
-	static int b;
-	public static void main(String[] args)
-	{
-		if(a && b)
-		{
-		}
-	}
+	static int a;
 }

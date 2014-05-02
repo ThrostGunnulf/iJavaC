@@ -1,6 +1,24 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "symbols.h"
 
+////
+// Functions for symbol finding.
+extern ClassTable* symbolsTable;
+MethodTable* currentLocalTable;
+
+Type getSymbol(char*, int);
+Type getSymbolFromGlobal(char*);
+Type getSymbolFromLocal(char*);
+Type getSymbolFromLocalOrGlobal(char*);
+MethodTable* getLocalTable(char*);
+
+////
+// Semantic errors functions.
+void errorAlreadyDefined(char*);
+
+////
+// Functions for table creation.
 ClassTableEntry* newVarEntries(VarDecl*, ClassTableEntry*);
 void newMethodEntry(MethodDecl*, ClassTableEntry*, ClassTable*);
 void newMethodTable(MethodTable*, ParamList*, VarDeclList*);
@@ -10,6 +28,7 @@ ClassTable* buildSymbolsTables(Class* myProgram)
     ClassTable* table = (ClassTable*) malloc(sizeof(ClassTable));
     table->id = myProgram->id;
     table->entries = NULL;
+    symbolsTable = table;
 
     DeclList* aux = myProgram->declList;
     ClassTableEntry* last = NULL, *end = NULL;
@@ -19,15 +38,16 @@ ClassTable* buildSymbolsTables(Class* myProgram)
         newEntry->methodTable = NULL;
         newEntry->next = NULL;
         end = newEntry;
-        if(aux->type == VARDECL)
-            end = newVarEntries(aux->varDecl, newEntry);
-        else if(aux->type == METHODDECL)
-            newMethodEntry(aux->methodDecl, newEntry, table);
 
         if(table->entries == NULL)
             table->entries = newEntry;
         else
             last->next = newEntry;
+
+        if(aux->type == VARDECL)
+            end = newVarEntries(aux->varDecl, newEntry);
+        else if(aux->type == METHODDECL)
+            newMethodEntry(aux->methodDecl, newEntry, table);
 
         last = end;
     }
@@ -37,7 +57,11 @@ ClassTable* buildSymbolsTables(Class* myProgram)
 
 ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
 {
-    tableEntry->id = decl->idList->id;
+    char* id = decl->idList->id;
+    if(getSymbolFromGlobal(id) != -1)
+        errorAlreadyDefined(id);
+
+    tableEntry->id = id;
     tableEntry->type = decl->type;
     tableEntry->next = NULL;
 
@@ -45,6 +69,9 @@ ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
     IDList* aux = decl->idList->next;
     for(; aux != NULL; aux = aux->next)
     {
+        if(getSymbolFromGlobal(aux->id) != -1)
+            errorAlreadyDefined(aux->id);
+
         ClassTableEntry* newEntry = (ClassTableEntry*) malloc(sizeof(ClassTableEntry));
         newEntry->id = aux->id;
         newEntry->type = decl->type;
@@ -64,6 +91,11 @@ ClassTableEntry* newVarEntries(VarDecl* decl, ClassTableEntry* tableEntry)
 
 void newMethodEntry(MethodDecl* decl, ClassTableEntry* tableEntry, ClassTable* broaderTable)
 {
+    char* id = decl->id;
+
+    if(getSymbolFromGlobal(id) != -1)
+        errorAlreadyDefined(id);
+
     tableEntry->id = decl->id;
     tableEntry->type = decl->type;
     tableEntry->next = NULL;
@@ -71,6 +103,7 @@ void newMethodEntry(MethodDecl* decl, ClassTableEntry* tableEntry, ClassTable* b
     MethodTable* methodTable = (MethodTable*) malloc(sizeof(MethodTable));
     methodTable->broaderTable = broaderTable;
     methodTable->entries = NULL;
+    currentLocalTable = methodTable;
     newMethodTable(methodTable, decl->paramList, decl->varDeclList);
 
     tableEntry->methodTable = methodTable;
@@ -84,6 +117,9 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
     MethodTableEntry* last = NULL;
     for(; auxP != NULL; auxP = auxP->next)
     {
+        if(getSymbolFromLocal(auxP->id) != -1)
+            errorAlreadyDefined(auxP->id);
+
         MethodTableEntry* newEntry = (MethodTableEntry*) malloc(sizeof(MethodTableEntry));
         newEntry->id = auxP->id;
         newEntry->type = auxP->type;
@@ -104,8 +140,12 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
     MethodTableEntry* end = NULL;
     for(; aux != NULL; aux = aux->next)
     {
+        char* id = aux->varDecl->idList->id;
+        if(getSymbolFromLocal(id) != -1)
+            errorAlreadyDefined(id);
+
         MethodTableEntry* newEntry = (MethodTableEntry*) malloc(sizeof(MethodTableEntry));
-        newEntry->id = aux->varDecl->idList->id;
+        newEntry->id = id;
         newEntry->type = aux->varDecl->type;
         newEntry->isParam = 0;
         newEntry->next = NULL;
@@ -114,6 +154,9 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
         IDList* aux2 = aux->varDecl->idList->next;
         for(; aux2 != NULL; aux2 = aux2->next)
         {
+            if(getSymbolFromLocal(aux2->id) != -1)
+                errorAlreadyDefined(aux2->id);
+
             MethodTableEntry* newEntry2 = (MethodTableEntry*) malloc(sizeof(MethodTableEntry));
             newEntry2->id = aux2->id;
             newEntry2->type = aux->varDecl->type;
@@ -133,4 +176,65 @@ void newMethodTable(MethodTable* methodTable, ParamList* params, VarDeclList* de
 
         last = end;
     }
+}
+
+////
+// Functions for symbol finding.
+Type getSymbol(char* id, int isMethod)
+{
+    if(isMethod)
+        return getSymbolFromGlobal(id);
+    else
+        return getSymbolFromLocal(id);
+}
+
+Type getSymbolFromGlobal(char* id)
+{
+    ClassTableEntry* aux = symbolsTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->id && strcmp(id, aux->id) == 0)
+            return aux->type;
+    }
+
+    return -1;
+}
+
+Type getSymbolFromLocal(char* id)
+{
+    MethodTableEntry* aux = currentLocalTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->id && strcmp(id, aux->id) == 0)
+            return aux->type;
+    }
+
+    return -1;
+}
+
+Type getSymbolFromLocalOrGlobal(char* id)
+{
+    Type ret = -1;
+    if((ret = getSymbolFromLocal(id)) == -1)
+        ret = getSymbolFromGlobal(id);
+
+    return ret;
+}
+
+MethodTable* getLocalTable(char* id)
+{
+    ClassTableEntry* aux = symbolsTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(strcmp(id, aux->id) == 0)
+            return aux->methodTable;
+    }
+
+    return NULL;
+}
+
+void errorAlreadyDefined(char* id)
+{
+    printf("Symbol %s already defined\n", id);
+    exit(-1);
 }
