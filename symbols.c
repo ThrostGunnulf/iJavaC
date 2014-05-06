@@ -5,7 +5,7 @@
 ////
 // Functions for symbol finding.
 extern ClassTable* symbolsTable;
-MethodTable* currentLocalTable;
+extern MethodTable* currentLocalTable;
 
 Type getSymbol(char*, int);
 Type getSymbolFromGlobal(char*);

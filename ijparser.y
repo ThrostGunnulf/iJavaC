@@ -55,7 +55,7 @@ ClassTable* symbolsTable = NULL;
 %left MULTIPLIC
 %right UNARY
 
-%nonassoc EXPR1REDUCE
+%nonassoc EXPRINDEXREDUCE
 
 %left '[' DOTLENGTH
 
@@ -111,7 +111,7 @@ statement: '{' stmtlist '}'           {$$=insertStmt(CSTAT, NULL, NULL, NULL, NU
          | RETURN expr ';'         {$$=insertStmt(RETURN_T, NULL, $2, NULL, NULL, NULL, NULL);}
          | RETURN ';'              {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL, NULL, NULL);};
 
-expr: exprindex				  %prec EXPR1REDUCE  {$$=$1;}
+expr: exprindex				  %prec EXPRINDEXREDUCE  {$$=$1;}
 	| exprnotindex								 {$$=$1;};
 
 exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
@@ -149,6 +149,7 @@ int main(int argc, char *argv[])
 		return 0;
 	
 	symbolsTable = buildSymbolsTables(myProgram);
+	checkSemantics(myProgram);
 	
 	int i, printTree, printSymbols;
 	printTree = printSymbols = 0;
