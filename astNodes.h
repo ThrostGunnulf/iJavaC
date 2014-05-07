@@ -102,7 +102,6 @@ typedef struct _class
 
 ////
 // Functions for node handling.
-
 Class* insertClass(char*, DeclList*);
 DeclList* insertDecl(DeclType, void*, DeclList*);
 VarDecl* insertFieldDecl(Type, char*, IDList*);

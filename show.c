@@ -3,8 +3,6 @@
 #include <string.h>
 #include "show.h"
 
-#define TYPE_SIZE 20
-
 ////
 // Utilities
 void typeToString(Type, char*);

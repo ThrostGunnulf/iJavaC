@@ -38,4 +38,13 @@ typedef struct _classTable
 // Functions for table creation.
 ClassTable* buildSymbolsTables(Class*);
 
+////
+// Functions for symbol finding.
+Type getMethodFromGlobal(char*);
+Type getSymbol(char*);
+Type getSymbolFromGlobal(char*);
+Type getSymbolFromLocal(char*);
+Type getSymbolFromLocalOrGlobal(char*);
+MethodTable* getLocalTable(char*);
+
 #endif

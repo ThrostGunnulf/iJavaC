@@ -1,9 +1,14 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "astNodes.h"
 #include "show.h"
 #include "symbols.h"
+#include "semantic.h"
+#include "exitClean.h"
+
+void checkFlags(int, char **, int*, int*);
 
 extern int prevLineNo;
 extern int prevColNo;
@@ -54,9 +59,6 @@ ClassTable* symbolsTable = NULL;
 %left ADDITIVE
 %left MULTIPLIC
 %right UNARY
-
-%nonassoc EXPRINDEXREDUCE
-
 %left '[' DOTLENGTH
 
 %nonassoc IFX
@@ -111,29 +113,29 @@ statement: '{' stmtlist '}'           {$$=insertStmt(CSTAT, NULL, NULL, NULL, NU
          | RETURN expr ';'         {$$=insertStmt(RETURN_T, NULL, $2, NULL, NULL, NULL, NULL);}
          | RETURN ';'              {$$=insertStmt(RETURN_T, NULL, NULL, NULL, NULL, NULL, NULL);};
 
-expr: exprindex				  %prec EXPRINDEXREDUCE  {$$=$1;}
-	| exprnotindex								 {$$=$1;};
+expr: exprindex			  			  {$$=$1;}
+	| exprnotindex					  {$$=$1;};
 
-exprindex: expr AND expr                    {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
-     	 | expr OR expr                     {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
-     	 | expr RELCOMPAR expr              {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
-     	 | expr EQUALITY expr               {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
-     	 | expr ADDITIVE expr               {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
-     	 | expr MULTIPLIC expr              {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
-     	 | ID                               {$$=insertExpr(ID_T, NULL, NULL, NULL, $1, NULL);}
-     	 | INTLIT                           {$$=insertExpr(INTLIT_T, NULL, NULL, NULL, $1, NULL);}
-     	 | BOOLLIT                          {$$=insertExpr(BOOLLIT_T, NULL, NULL, NULL, $1, NULL);}
+exprindex: ID                              {$$=insertExpr(ID_T, NULL, NULL, NULL, $1, NULL);}
+     	 | INTLIT                          {$$=insertExpr(INTLIT_T, NULL, NULL, NULL, $1, NULL);}
+     	 | BOOLLIT                         {$$=insertExpr(BOOLLIT_T, NULL, NULL, NULL, $1, NULL);}
      	 | '(' expr ')'                     {$$=$2;}
      	 | expr DOTLENGTH                   {$$=insertExpr(UNOP, "DOT", $1, NULL, NULL, NULL);}
-     	 | '!' expr          %prec UNARY    {$$=insertExpr(UNOP, "!", $2, NULL, NULL, NULL);}
-     	 | ADDITIVE expr     %prec UNARY    {$$=insertExpr(UNOP, $1, $2, NULL, NULL, NULL);}
      	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, $3, $5, NULL, $3, NULL);}
      	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, $1, $3);}
      	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, $1, NULL);};
 		 | exprindex '[' expr ']'  			{$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
 
-exprnotindex: NEW INT '[' expr ']'       {$$=insertExpr(NEWINTARR, NULL, $4, NULL, NULL, NULL);}
-     		| NEW BOOL '[' expr ']'      {$$=insertExpr(NEWBOOLARR, NULL, $4, NULL, NULL, NULL);};
+exprnotindex: NEW INT '[' expr ']'        {$$=insertExpr(NEWINTARR, NULL, $4, NULL, NULL, NULL);}
+     		| NEW BOOL '[' expr ']'       {$$=insertExpr(NEWBOOLARR, NULL, $4, NULL, NULL, NULL);}
+     	 	| '!' expr       %prec UNARY  {$$=insertExpr(UNOP, "!", $2, NULL, NULL, NULL);}
+     	 	| ADDITIVE expr  %prec UNARY  {$$=insertExpr(UNOP, $1, $2, NULL, NULL, NULL);}
+     	 	| expr AND expr               {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 	| expr OR expr                {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 	| expr RELCOMPAR expr         {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 	| expr EQUALITY expr          {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 	| expr ADDITIVE expr          {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);}
+     	 	| expr MULTIPLIC expr         {$$=insertExpr(BINOP, $2, $1, $3, NULL, NULL);};
 
 args: expr argslist                {$$=insertArg($1, $2);}
     | expr                         {$$=insertArg($1, NULL);};
@@ -144,34 +146,51 @@ argslist: ',' args                 {$$=$2;};
 
 int main(int argc, char *argv[])
 {
+	int printTree, printSymbols;
+
 	yyparse();
 	if(error)
-		return 0;
+		exitClean(0);
 	
-	symbolsTable = buildSymbolsTables(myProgram);
-	checkSemantics(myProgram);
-	
-	int i, printTree, printSymbols;
-	printTree = printSymbols = 0;
-	for(i=0; i < argc; i++)
-	{
-		if(strcmp(argv[i], "-s") == 0)
-		{
-			printSymbols = 1;
-		}
-		else if(strcmp(argv[i], "-t") == 0)
-		{
-			printTree = 1;
-		}
-	}
+	checkFlags(argc, argv, &printTree, &printSymbols);
 	
 	if(printTree)
 		printProgram(myProgram);
+	
+	if(!printTree || printSymbols)
+	{
+		symbolsTable = buildSymbolsTables(myProgram);
+		checkSemantics(myProgram);
+	}
+	
 	if(printSymbols)
 		printSymbolTables(symbolsTable);
 	
 	//freeProgram(myProgram, symbolsTable); //TO IMPLEMENT
     return 0;
+}
+
+void checkFlags(int argc, char *argv[], int* printTree, int* printSymbols)
+{	
+	int i;
+	*printTree = *printSymbols = 0;
+	for(i=0; i < argc; i++)
+	{
+		if(strcmp(argv[i], "-s") == 0)
+		{
+			*printSymbols = 1;
+		}
+		else if(strcmp(argv[i], "-t") == 0)
+		{
+			*printTree = 1;
+		}
+	}
+}
+
+void exitClean(int exitValue)
+{	
+	//freeProgram(myProgram, symbolsTable); //TO IMPLEMENT
+	exit(0);
 }
 
 int yyerror(char *s)

@@ -1,5 +1,37 @@
 class gcd
 {
-	static int a;
-	static int a;
+	static int c;
+	static int b;
+	
+	public static int a(int a, boolean b, int[] c, boolean[] d) {return 1;}
+	public static void main(String[] args)
+	{
+		int a1, a2, a, main;
+		boolean b2, b3, b, b4;
+		int[] c, c3;
+		boolean[] d;
+		
+		c = new int [false];
+	}
 }
+
+/*
+class gcd
+{
+	static int a, c;
+	static int b;
+	
+	public static void main(String[] args)
+	{
+		int a, a, a;
+		boolean b2, b3, b;
+		int[] c;
+		boolean[] d, main;
+	}
+	
+	public static int a1(int a, int[] afg, boolean c, boolean[] d)
+	{
+		//int a;
+	}
+}
+*/
