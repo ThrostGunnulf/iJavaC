@@ -7,6 +7,7 @@
 #include "symbols.h"
 #include "semantic.h"
 #include "exitClean.h"
+#include "codeGen.h"
 
 void checkFlags(int, char **, int*, int*);
 
@@ -166,6 +167,8 @@ int main(int argc, char *argv[])
 	if(printSymbols)
 		printSymbolTables(symbolsTable);
 	
+    generateCode();
+
 	//freeProgram(myProgram, symbolsTable); //TO IMPLEMENT
     return 0;
 }
