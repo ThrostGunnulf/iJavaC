@@ -232,7 +232,8 @@ Type checkExpr(Expr* expr)
             t2 = VOID_T;
             if(auxParams != NULL)
             {
-                t2 = auxParams->type;
+                if(auxParams->isParam)
+                    t2 = auxParams->type;
                 auxParams = auxParams->next;
                 if(auxParams && !auxParams->isParam)
                     auxParams = NULL;
