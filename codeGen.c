@@ -18,7 +18,8 @@ void genMethod(MethodDecl*);
 void genLocalVar(VarDecl*);
 void genStmtList(StmtList*);
 void genStmt(Stmt*);
-int genExpr(Expr* expr);
+int buildExpression(Expr*,int,int,char*);
+int genExpr(Expr*);
 
 void getTypeLLVM(char*, Type);
 void getRetTypeLLVM(char*, Type);
@@ -232,9 +233,149 @@ void genStmt(Stmt* stmt)
     }
 }
 
+int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
+{
+    int returnValue = varNumber++;
+
+    if(expr->expr1->type == INTLIT_T && expr->expr2->type == INTLIT_T)
+    {
+        printf("%%%d = %s i32 %d %d", returnValue, operation, leftExprId, rightExprId);
+    }
+    else if(expr->expr1->type == INTLIT_T)
+    {
+        printf("%%%d = %s i32 %d %%%d", returnValue, operation, leftExprId, rightExprId);
+    }
+    else
+    {
+        printf("%%%d = %s i32 %%%d %%%d", returnValue, operation, leftExprId, rightExprId);
+    }
+
+    return returnValue;
+}
+
 int genExpr(Expr* expr)
 {
+    int returnValue;
 
+    int leftExprId, rightExprId;
+
+    if(expr->type == BINOP)
+    {
+        leftExprId = genExpr(expr->expr1);
+        rightExprId = genExpr(expr->expr2);
+
+        if(expr->op == PLUS)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "add");
+        }
+        else if(expr->op == MINUS)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "sub");
+        }
+        else if(expr->op == MUL)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "mul");
+        }
+        else if(expr->op == DIV)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "sdiv");
+        }
+        else if(expr->op == REM)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "srem");
+        }
+        else if(expr->op == LESSER)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp slt");
+        }
+        else if(expr->op == GREATER)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sgt");
+        }
+        else if(expr->opr == LEQ)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sle");
+        }
+        else if(expr->opr == GEQ)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sge");
+        }
+        else if(expr->op == DIF)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp ne");
+        }
+        else if(expr->op == EQ)
+        {
+            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp eq");
+        }
+        else if(exp->op == AND_T)
+        {
+            leftExprId = genExpr(expr->expr1);
+            rightExprId = genExpr(expr->expr2);
+
+            printf("%%%d = icmp ne i32 %%%d, 0", varNumber, );
+            printf("br i1 %%%d, label %%%d, label");
+        }
+        else if(expr->op == OR_T)
+        {
+
+        }
+
+        return returnValue;
+    }
+    else if(expr->type == UNOP)
+    {
+        int exprId;
+
+        if(expr->op == PLUS) //Not necessary
+        {
+
+        }
+        else if(expr->op == MINUS)
+        {
+            exprId = genExpr(expr->expr1);
+            returnValue = varNumber++;
+            printf("%%%d = sub i32 0, %%%d", returnValue, tempVar);
+        }
+        else if(expr->op == NOT)
+        {
+
+        }
+    }
+    else if(expr->type == ID_T)
+    {
+        returnValue = varNumber++;
+        printf("%%%d = load i32* %%%s", returnValue, expr->idOrLit);
+    }
+    else if(expr->type == INTLIT_T)
+    {
+        returnValue = (int) strtol(expr->idOrLit, NULL, 0);
+    }
+    else if(expr->type == BOOLLIT_T)
+    {
+        if(strcmp(expr->idOrLit, "true")) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    else if(expr->type == CALL)
+    {
+
+    }
+    else if(expr->type == PARSEINT_T) {
+
+    }
+    else if(expr->type == INDEX) {
+
+    }
+    else if(expr->type == NEWINTARR) {
+
+    }
+    else if(expr->type == NEWBOOLARR) {
+
+    }
 }
 
 const char* llvmTypes[6] = {"void", "i32", "i1", "i32*", "i1*", "i8**"};
