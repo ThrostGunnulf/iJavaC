@@ -236,6 +236,7 @@ void genStmt(Stmt* stmt)
 int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
 {
     int returnValue = varNumber++;
+    int leftExprId, rightExprId;
 
     if(expr->expr1->type == INTLIT_T && expr->expr2->type == INTLIT_T)
     {
@@ -256,7 +257,6 @@ int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
 int genExpr(Expr* expr)
 {
     int returnValue;
-
     int leftExprId, rightExprId;
 
     if(expr->type == BINOP)
@@ -292,11 +292,11 @@ int genExpr(Expr* expr)
         {
             returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sgt");
         }
-        else if(expr->opr == LEQ)
+        else if(expr->op == LEQ)
         {
             returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sle");
         }
-        else if(expr->opr == GEQ)
+        else if(expr->op == GEQ)
         {
             returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sge");
         }
@@ -308,13 +308,13 @@ int genExpr(Expr* expr)
         {
             returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp eq");
         }
-        else if(exp->op == AND_T)
+        else if(expr->op == AND_T)
         {
-            leftExprId = genExpr(expr->expr1);
+            /*leftExprId = genExpr(expr->expr1);
             rightExprId = genExpr(expr->expr2);
 
             printf("%%%d = icmp ne i32 %%%d, 0", varNumber, );
-            printf("br i1 %%%d, label %%%d, label");
+            printf("br i1 %%%d, label %%%d, label");*/
         }
         else if(expr->op == OR_T)
         {
@@ -335,7 +335,7 @@ int genExpr(Expr* expr)
         {
             exprId = genExpr(expr->expr1);
             returnValue = varNumber++;
-            printf("%%%d = sub i32 0, %%%d", returnValue, tempVar);
+            printf("%%%d = sub i32 0, %%%d", returnValue, exprId);
         }
         else if(expr->op == NOT)
         {
