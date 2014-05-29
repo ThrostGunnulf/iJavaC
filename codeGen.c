@@ -177,7 +177,7 @@ void genStmt(Stmt* stmt)
         printf("\tbr i1 %%%d, label %%whiledo%d, label %%whileend%d\n\n", exprVarNumber, whileNumber, whileNumber);
 
         printf("whiledo%d:\n", whileNumber);
-        genStmt(stmt->stmt1);
+        genStmt(stmt->stmt1); //FIX BUG: Stmt->stmt1 is NULL
 
         printf("\nwhileend%d:\n", whileNumber);
 
@@ -203,7 +203,12 @@ void genStmt(Stmt* stmt)
 
         getTypeLLVM(llvmType, varType);
 
-        printf("\tstore %s %%%d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
+        if(stmt->expr1->type == INTLIT_T) { //Do the same to BOOL
+            printf("\tstore %s %d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
+        }
+        else {
+            printf("\tstore %s %%%d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
+        }
     }
     else if(stmt->type == STOREARRAY)
     {
@@ -236,19 +241,22 @@ void genStmt(Stmt* stmt)
 int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
 {
     int returnValue = varNumber++;
-    int leftExprId, rightExprId;
 
     if(expr->expr1->type == INTLIT_T && expr->expr2->type == INTLIT_T)
     {
-        printf("%%%d = %s i32 %d %d", returnValue, operation, leftExprId, rightExprId);
+        printf("\t%%%d = %s i32 %d %d\n", returnValue, operation, leftExpr, rightExpr);
     }
     else if(expr->expr1->type == INTLIT_T)
     {
-        printf("%%%d = %s i32 %d %%%d", returnValue, operation, leftExprId, rightExprId);
+        printf("\t%%%d = %s i32 %d %%%d\n", returnValue, operation, leftExpr, rightExpr);
+    }
+    else if(expr->expr2->type == INTLIT_T)
+    {
+        printf("\t%%%d = %s i32 %%%d %d\n", returnValue, operation, leftExpr, rightExpr);
     }
     else
     {
-        printf("%%%d = %s i32 %%%d %%%d", returnValue, operation, leftExprId, rightExprId);
+        printf("\t%%%d = %s i32 %%%d %%%d\n", returnValue, operation, leftExpr, rightExpr);
     }
 
     return returnValue;
@@ -345,7 +353,7 @@ int genExpr(Expr* expr)
     else if(expr->type == ID_T)
     {
         returnValue = varNumber++;
-        printf("%%%d = load i32* %%%s", returnValue, expr->idOrLit);
+        printf("\t%%%d = load i32* %%%s\n", returnValue, expr->idOrLit);
     }
     else if(expr->type == INTLIT_T)
     {
@@ -376,6 +384,8 @@ int genExpr(Expr* expr)
     else if(expr->type == NEWBOOLARR) {
 
     }
+
+    return returnValue;
 }
 
 const char* llvmTypes[6] = {"void", "i32", "i1", "i32*", "i1*", "i8**"};

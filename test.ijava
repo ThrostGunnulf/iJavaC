@@ -1,13 +1,13 @@
 class gcd
 {
-	static int a, b, c;
+	/*static int a, b, c;
 	static boolean d, e;
 	static int[] f, g;
-	static boolean[] h, i, j;
+	static boolean[] h, i, j;*/
 	
 	public static void main(String[] args)
 	{
-		int b, c;
+		/*int b, c;
 		boolean d, e;
 		int[] f, g;
 		boolean[] h, i, j;
@@ -30,11 +30,22 @@ class gcd
 		{
 			a = a + 1;
 		}
+		*/
+
+		int a, b, c;
+
+		a = 1;
+		b = 2;
+
+		while(a < b) {
 		
+		}
+
+
 		return;
 	}
 	
-	public static int[] test1(int[] a, boolean[]b)
+	/*public static int[] test1(int[] a, boolean[]b)
 	{
 		return test2();
 	}
@@ -50,6 +61,6 @@ class gcd
 	public static boolean[] test3()
 	{
 		return new boolean[7];
-	}
+	}*/
 }
 
