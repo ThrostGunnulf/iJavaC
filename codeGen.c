@@ -33,6 +33,7 @@ void getRetTypeLLVM(char*, Type);
 
 void generateCode()
 {
+    ifNumber = whileNumber = andNumber = orNumber = 0;
     genPreamble();
 
     DeclList* aux = myProgram->declList;
@@ -85,29 +86,24 @@ void genGlobalVar(VarDecl* varDecl)
 
 void genMethod(MethodDecl* methodDecl)
 {
+    varNumber = indexNumber = 0;
     curFunctionType = methodDecl->type;
-    varNumber = ifNumber = whileNumber = indexNumber = andNumber = orNumber = 0;
     currentLocalTable = getLocalTable(methodDecl->id);
 
     char llvmType[MAX_LLVM_TYPE_SIZE];
-    getRetTypeLLVM(llvmType, methodDecl->type);
+    if(strcmp(methodDecl->id, "main") == 0)
+        getRetTypeLLVM(llvmType, INT_T);
+    else
+        getRetTypeLLVM(llvmType, methodDecl->type);
 
     printf("define %s @%s(", llvmType, methodDecl->id);
 
     ParamList* aux = methodDecl->paramList;
-    if(aux != NULL)
-    {
-        getTypeLLVM(llvmType, aux->type);
-        if(aux->type == INTARRAY || aux->type == BOOLARRAY || aux->type == STRINGARRAY)
-            printf("i32 %%.%s, ", aux->id);
-        printf("%s %%%s", llvmType, aux->id);
-        aux = aux->next;
-    }
     for(; aux != NULL; aux = aux->next)
     {
         getTypeLLVM(llvmType, aux->type);
-        if(aux->type == INTARRAY || aux->type == BOOLARRAY || aux->type == STRINGARRAY)
-            printf(", i32 %%.%s", aux->id);
+        if(aux->type == STRINGARRAY)
+            printf("i32 %%.%s", aux->id);
         printf(", %s %%%s", llvmType, aux->id);
     }
 
@@ -118,6 +114,9 @@ void genMethod(MethodDecl* methodDecl)
         genLocalVar(aux2->varDecl);
 
     genStmtList(methodDecl->stmtList);
+
+    if(strcmp(methodDecl->id, "main") == 0)
+        printf("ret i32 0\n");
 
     printf("}\n\n");
 }
@@ -220,7 +219,6 @@ void genStmt(Stmt* stmt)
             printf("%%%d = getelementptr inbounds [2 x i8*]* @%s, i32 0, i32 %%%d\n", varNumber++, stmt->id, varNumber);
             printf("%%%d = load i8** %%d\n", varNumber++, varNumber);
             printf("call i32 (i8*, ...)* @printf(i8* %%%d)\n", varNumber);
-
         }
     }
     else if(stmt->type == STORE)
