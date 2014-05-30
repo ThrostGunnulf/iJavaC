@@ -409,20 +409,23 @@ ExprRet genExpr(Expr* expr)
     }
     else if(expr->type == ID_T)
     {
-        Type idType = getSymbolFromGlobal(expr->idOrLit);
         char llvmType[MAX_LLVM_TYPE_SIZE];
+        Type idType = getSymbolFromLocal(expr->idOrLit);
 
         returnValue.tempVarNum = varNumber++;
 
-        if(idType != -1) {
-            getTypeLLVM(llvmType, idType);
-            printf("\t%%%d = load %s* @%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
-        }
-        else {
-            idType = getSymbolFromLocal(expr->idOrLit);
+        if(idType != -1)
+        {
             getTypeLLVM(llvmType, idType);
             printf("\t%%%d = load %s* %%%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
         }
+        else
+        {
+            idType = getSymbolFromGlobal(expr->idOrLit);
+            getTypeLLVM(llvmType, idType);
+            printf("\t%%%d = load %s* @%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
+        }
+
         returnValue.type = idType;
     }
     else if(expr->type == INTLIT_T)
