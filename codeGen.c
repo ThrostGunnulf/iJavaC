@@ -25,7 +25,7 @@ void genMethod(MethodDecl*);
 void genLocalVar(VarDecl*);
 void genStmtList(StmtList*);
 void genStmt(Stmt*);
-ExprRet buildExpression(Expr*,int,int,char*);
+ExprRet buildExpression(Expr*,ExprRet,ExprRet,char*);
 ExprRet genExpr(Expr*);
 
 void getTypeLLVM(char*, Type);
@@ -277,34 +277,37 @@ void genStmt(Stmt* stmt)
     }
 }
 
-ExprRet buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
+ExprRet buildExpression(Expr* expr, ExprRet leftExpr, ExprRet rightExpr, char* operation)
 {
-    int returnValue = varNumber++;
+    ExprRet returnValue;
+
+    returnValue.tempVarNum = varNumber++;
 
     if(expr->expr1->type == INTLIT_T && expr->expr2->type == INTLIT_T)
     {
-        printf("\t%%%d = %s i32 %d, %d\n\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %d, %d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
     }
     else if(expr->expr1->type == INTLIT_T)
     {
-        printf("\t%%%d = %s i32 %d, %%%d\n\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %d, %%%d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
     }
     else if(expr->expr2->type == INTLIT_T)
     {
-        printf("\t%%%d = %s i32 %%%d, %d\n\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %%%d, %d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
     }
     else
     {
-        printf("\t%%%d = %s i32 %%%d, %%%d\n\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %%%d, %%%d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
     }
+    returnValue.type = INT_T;
 
     return returnValue;
 }
 
 ExprRet genExpr(Expr* expr)
 {
-    int returnValue;
-    int leftExprId, rightExprId;
+    ExprRet returnValue;
+    ExprRet leftExprId, rightExprId;
 
     if(expr->type == BINOP)
     {
@@ -362,13 +365,13 @@ ExprRet genExpr(Expr* expr)
             leftExprId = genExpr(expr->expr1);
 
             tempId = varNumber++;
-            printf("%%%d = icmp ne i32 %%%d, 0", tempId, leftExprId);
+            printf("%%%d = icmp ne i32 %%%d, 0", tempId, leftExprId.tempVarNum);
 
             printf("\tbr i1 %%%d, label %%andTrue%d, label %%andFalse%d\n\n", tempId, andNumber, andNumber);
 
             printf("andTrue%d:\n", andNumber);
             rightExprId = genExpr(expr->expr2);
-            printf("\t%%%d = icmp ne i32 %%%d, 0\n", varNumber, rightExprId);
+            printf("\t%%%d = icmp ne i32 %%%d, 0\n", varNumber, rightExprId.tempVarNum);
             tempId = varNumber++;
             printf("\tbr label %%andFalse%d\n\n", andNumber);
 
@@ -383,28 +386,31 @@ ExprRet genExpr(Expr* expr)
     }
     else if(expr->type == UNOP)
     {
-        int exprId;
+        ExprRet exprId;
 
         if(expr->op == PLUS) //Not necessary
         {
             exprId = genExpr(expr->expr1);
-            returnValue = varNumber++;
-            printf("%%%d = add i32 0, %%%d\n\n", returnValue, exprId);
+            returnValue.tempVarNum = varNumber++;
+            printf("%%%d = add i32 0, %%%d\n\n", returnValue.tempVarNum, exprId.tempVarNum);
+            returnValue.type = INT_T;
         }
         else if(expr->op == MINUS)
         {
             exprId = genExpr(expr->expr1);
-            returnValue = varNumber++;
-            printf("%%%d = sub i32 0, %%%d\n\n", returnValue, exprId);
+            returnValue.tempVarNum = varNumber++;
+            printf("%%%d = sub i32 0, %%%d\n\n", returnValue.tempVarNum, exprId.tempVarNum);
+            returnValue.type = INT_T;
         }
         else if(expr->op == NOT)
         {
             int tempId;
             exprId = genExpr(expr->expr1);
-            returnValue = varNumber++;
-            printf("\t%%%d = icmp ne i1 %%%d, 0\n", returnValue, exprId);
-            printf("\t%%%d = xor i1 %%%d, true\n\n", varNumber, returnValue);
-            returnValue = varNumber++;
+            returnValue.tempVarNum = varNumber++;
+            printf("\t%%%d = icmp ne i1 %%%d, 0\n", returnValue.tempVarNum, exprId.tempVarNum);
+            printf("\t%%%d = xor i1 %%%d, true\n\n", varNumber, returnValue.tempVarNum);
+            returnValue.tempVarNum = varNumber++;
+            returnValue.type = BOOL_T;
         }
     }
     else if(expr->type == ID_T)
@@ -412,30 +418,33 @@ ExprRet genExpr(Expr* expr)
         Type idType = getSymbolFromGlobal(expr->idOrLit);
         char llvmType[MAX_LLVM_TYPE_SIZE];
 
-        returnValue = varNumber++;
+        returnValue.tempVarNum = varNumber++;
 
         if(idType != -1) {
             getTypeLLVM(llvmType, idType);
-            printf("\t%%%d = load %s* @%s\n\n", returnValue, llvmType, expr->idOrLit);
+            printf("\t%%%d = load %s* @%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
         }
         else {
             idType = getSymbolFromLocal(expr->idOrLit);
             getTypeLLVM(llvmType, idType);
-            printf("\t%%%d = load %s* %%%s\n\n", returnValue, llvmType, expr->idOrLit);
+            printf("\t%%%d = load %s* %%%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
         }
+        returnValue.type = idType;
     }
     else if(expr->type == INTLIT_T)
     {
-        returnValue = (int) strtol(expr->idOrLit, NULL, 0);
+        returnValue.tempVarNum = (int) strtol(expr->idOrLit, NULL, 0);
+        returnValue.type = INT_T;
     }
     else if(expr->type == BOOLLIT_T)
     {
         if(strcmp(expr->idOrLit, "true")) {
-            return 1;
+            returnValue.tempVarNum = 1;
         }
         else {
-            return 0;
+            returnValue.tempVarNum = 1;
         }
+        returnValue.type = BOOL_T;
     }
     else if(expr->type == CALL)
     {
@@ -450,10 +459,18 @@ ExprRet genExpr(Expr* expr)
         leftExprId = genExpr(expr->expr1);
         rightExprId = genExpr(expr->expr2);
 
-        returnValue = varNumber++;
-        printf("\t%%%d = getelementptr inbounds i32* %%%d, i32 0, i32 %%%d\n", returnValue, leftExprId, rightExprId);
-        printf("\t%%%d = load i32* %%%d\n\n", varNumber, returnValue);
-        returnValue = varNumber++;
+        returnValue.tempVarNum = varNumber++;
+        if(leftExprId.type == INTARRAY) {
+            printf("\t%%%d = getelementptr inbounds i32* %%%d, i32 0, i32 %%%d\n", returnValue.tempVarNum, leftExprId.tempVarNum, rightExprId.tempVarNum);
+            printf("\t%%%d = load i32* %%%d\n\n", varNumber, returnValue.tempVarNum);
+            returnValue.type = INT_T;
+        }
+        else {
+            printf("\t%%%d = getelementptr inbounds i1* %%%d, i32 0, i32 %%%d\n", returnValue.tempVarNum, leftExprId.tempVarNum, rightExprId.tempVarNum);
+            printf("\t%%%d = load i1* %%%d\n\n", varNumber, returnValue.tempVarNum);
+            returnValue.type = BOOL_T;
+        }
+        returnValue.tempVarNum = varNumber++;
     }
     else if(expr->type == NEWINTARR) {
 
