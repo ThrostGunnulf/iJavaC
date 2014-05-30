@@ -125,7 +125,7 @@ exprindex: ID                              {$$=insertExpr(ID_T, NULL, NULL, NULL
      	 | PARSEINT '(' ID '[' expr ']' ')' {$$=insertExpr(PARSEINT_T, $3, $5, NULL, $3, NULL);}
      	 | ID '(' args ')'                  {$$=insertExpr(CALL, NULL, NULL, NULL, $1, $3);}
      	 | ID '(' ')'                       {$$=insertExpr(CALL, NULL, NULL, NULL, $1, NULL);};
-		 | exprindex '[' expr ']'  			{$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
+         | exprindex '[' expr ']'  			{$$=insertExpr(INDEX, NULL, $1, $3, NULL, NULL);}
 
 exprnotindex: NEW INT '[' expr ']'        {$$=insertExpr(NEWINTARR, NULL, $4, NULL, NULL, NULL);}
      		| NEW BOOL '[' expr ']'       {$$=insertExpr(NEWBOOLARR, NULL, $4, NULL, NULL, NULL);}
