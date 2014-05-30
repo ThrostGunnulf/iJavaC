@@ -32,15 +32,12 @@ class gcd
 		}
 		*/
 
-		int a, b, c;
-
-		a = 1;
-		b = 2;
-
-		while(a < b) {
+		boolean a , b , c;
 		
-		}
+		a = true;
+		b = false;
 
+		c = a && b;
 
 		return;
 	}

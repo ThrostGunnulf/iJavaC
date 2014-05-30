@@ -11,7 +11,7 @@ extern Class* myProgram;
 extern ClassTable* symbolsTable;
 extern MethodTable* currentLocalTable;
 Type curFunctionType;
-int varNumber, ifNumber, whileNumber, indexNumber;
+int varNumber, ifNumber, whileNumber, indexNumber, andNumber, orNumber;
 
 void genGlobalVar(VarDecl*);
 void genMethod(MethodDecl*);
@@ -65,7 +65,7 @@ void genGlobalVar(VarDecl* varDecl)
 void genMethod(MethodDecl* methodDecl)
 {
     curFunctionType = methodDecl->type;
-    varNumber = ifNumber = whileNumber = indexNumber = 0;
+    varNumber = ifNumber = whileNumber = indexNumber = andNumber = orNumber = 0;
     currentLocalTable = getLocalTable(methodDecl->id);
 
     char llvmType[MAX_LLVM_TYPE_SIZE];
@@ -141,11 +141,13 @@ void genStmt(Stmt* stmt)
         printf("\tbr i1 %%%d, label %%ifthen%d, label %%ifelse%d\n\n", compVarNumber, ifNumber, ifNumber);
 
         printf("ifthen%d:\n", ifNumber);
-        genStmt(stmt->stmt1);
+        if(stmt->stmt1 != NULL)
+            genStmt(stmt->stmt1);
         printf("\tbr label %%ifend%d\n\n", ifNumber);
 
         printf("ifelse%d:\n", ifNumber);
-        genStmt(stmt->stmt2);
+        if(stmt->stmt2 != NULL)
+            genStmt(stmt->stmt2);
         printf("\tbr label %%ifend%d\n\n", ifNumber);
 
         printf("ifend%d:\n", ifNumber);
@@ -177,7 +179,8 @@ void genStmt(Stmt* stmt)
         printf("\tbr i1 %%%d, label %%whiledo%d, label %%whileend%d\n\n", exprVarNumber, whileNumber, whileNumber);
 
         printf("whiledo%d:\n", whileNumber);
-        genStmt(stmt->stmt1); //FIX BUG: Stmt->stmt1 is NULL
+        if(stmt->stmt1 != NULL)
+            genStmt(stmt->stmt1);
 
         printf("\nwhileend%d:\n", whileNumber);
 
@@ -203,10 +206,12 @@ void genStmt(Stmt* stmt)
 
         getTypeLLVM(llvmType, varType);
 
-        if(stmt->expr1->type == INTLIT_T) { //Do the same to BOOL
+        if(stmt->expr1->type == INTLIT_T || stmt->expr1->type == BOOLLIT_T)
+        {
             printf("\tstore %s %d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
         }
-        else {
+        else
+        {
             printf("\tstore %s %%%d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
         }
     }
@@ -244,19 +249,19 @@ int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
 
     if(expr->expr1->type == INTLIT_T && expr->expr2->type == INTLIT_T)
     {
-        printf("\t%%%d = %s i32 %d %d\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %d, %d\n", returnValue, operation, leftExpr, rightExpr);
     }
     else if(expr->expr1->type == INTLIT_T)
     {
-        printf("\t%%%d = %s i32 %d %%%d\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %d, %%%d\n", returnValue, operation, leftExpr, rightExpr);
     }
     else if(expr->expr2->type == INTLIT_T)
     {
-        printf("\t%%%d = %s i32 %%%d %d\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %%%d, %d\n", returnValue, operation, leftExpr, rightExpr);
     }
     else
     {
-        printf("\t%%%d = %s i32 %%%d %%%d\n", returnValue, operation, leftExpr, rightExpr);
+        printf("\t%%%d = %s i32 %%%d, %%%d\n", returnValue, operation, leftExpr, rightExpr);
     }
 
     return returnValue;
@@ -318,11 +323,24 @@ int genExpr(Expr* expr)
         }
         else if(expr->op == AND_T)
         {
-            /*leftExprId = genExpr(expr->expr1);
-            rightExprId = genExpr(expr->expr2);
+            int tempId;
 
-            printf("%%%d = icmp ne i32 %%%d, 0", varNumber, );
-            printf("br i1 %%%d, label %%%d, label");*/
+            leftExprId = genExpr(expr->expr1);
+
+            tempId = varNumber++;
+            printf("%%%d = icmp ne i32 %%%d, 0", tempId, leftExprId);
+
+            printf("\tbr i1 %%%d, label %%andTrue%d, label %%andFalse%d\n\n", tempId, andNumber, andNumber);
+
+            printf("andTrue%d:\n", andNumber);
+            rightExprId = genExpr(expr->expr2);
+            printf("\t%%%d = icmp ne i32 %%%d, 0\n", varNumber, rightExprId);
+            tempId = varNumber++;
+            printf("\tbr label %%andFalse%d\n\n", andNumber);
+
+            printf("andFalse%d\n", andNumber);
+
+
         }
         else if(expr->op == OR_T)
         {
@@ -337,7 +355,9 @@ int genExpr(Expr* expr)
 
         if(expr->op == PLUS) //Not necessary
         {
-
+            exprId = genExpr(expr->expr1);
+            returnValue = varNumber++;
+            printf("%%%d = add i32 0, %%%d", returnValue, exprId);
         }
         else if(expr->op == MINUS)
         {
@@ -347,7 +367,14 @@ int genExpr(Expr* expr)
         }
         else if(expr->op == NOT)
         {
-
+            int tempId;
+            exprId = genExpr(expr->expr1);
+            returnValue = varNumber++;
+            printf("\t%%%d = icmp ne i32 %%%d, 0\n", returnValue, exprId);
+            printf("\t%%%d = xor i1 %%%d, true\n", varNumber, returnValue);
+            returnValue = varNumber++;
+            printf("\t%%%d = zext i1 %%%d to i32\n", varNumber, returnValue);
+            returnValue = varNumber++;
         }
     }
     else if(expr->type == ID_T)
