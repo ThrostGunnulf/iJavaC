@@ -53,7 +53,7 @@ void genPreamble()
     printf("\n");
     printf("@str.d = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
     printf("@str.f = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
-    printf("@str.f = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
+    printf("@str.t = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
     printf("@str.bools = global [2 x i8*] [i8* getelementptr inbounds ([7 x i8]* @str.f, i32 0, i32 0), i8* getelementptr inbounds ([7 x i8]* @str.t, i32 0, i32 0)]\n");
     printf("\n");
 }
@@ -86,7 +86,7 @@ void genGlobalVar(VarDecl* varDecl)
 
 void genMethod(MethodDecl* methodDecl)
 {
-    varNumber = indexNumber = 0;
+    varNumber = indexNumber = 1;
     curFunctionType = methodDecl->type;
     currentLocalTable = getLocalTable(methodDecl->id);
 
@@ -211,15 +211,16 @@ void genStmt(Stmt* stmt)
         ExprRet ret = genExpr(stmt->expr1);
         if(ret.type == INT_T)
         {
-            printf("call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str2, i32 0, i32 0), i32 %%%d)\n", ret.tempVarNum);
+            printf("\tcall i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @str.d, i32 0, i32 0), i32 %%%d)\n", ret.tempVarNum);
         }
         else if(ret.type == BOOL_T)
         {
-            printf("%%%d = zext i1 %%%d to i32\n", varNumber++, ret.tempVarNum);
-            printf("%%%d = getelementptr inbounds [2 x i8*]* @%s, i32 0, i32 %%%d\n", varNumber++, stmt->id, varNumber);
-            printf("%%%d = load i8** %%d\n", varNumber++, varNumber);
-            printf("call i32 (i8*, ...)* @printf(i8* %%%d)\n", varNumber);
+            printf("\t%%%d = zext i1 %%%d to i32\n", varNumber++, ret.tempVarNum);
+            printf("\t%%%d = getelementptr inbounds [2 x i8*]* @str.bools, i32 0, i32 %%%d\n", varNumber++, varNumber -1);
+            printf("\t%%%d = load i8** %%%d\n", varNumber++, varNumber -1);
+            printf("\tcall i32 (i8*, ...)* @printf(i8* %%%d)\n\n", varNumber -1);
         }
+        varNumber++;
     }
     else if(stmt->type == STORE)
     {
@@ -438,11 +439,11 @@ ExprRet genExpr(Expr* expr)
     }
     else if(expr->type == BOOLLIT_T)
     {
-        if(strcmp(expr->idOrLit, "true")) {
+        if(strcmp(expr->idOrLit, "true") == 0) {
             returnValue.tempVarNum = 1;
         }
         else {
-            returnValue.tempVarNum = 1;
+            returnValue.tempVarNum = 0;
         }
         returnValue.type = BOOL_T;
     }
