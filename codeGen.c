@@ -7,25 +7,34 @@
 
 #define MAX_LLVM_TYPE_SIZE 15
 
+typedef struct _ExprRet
+{
+    int tempVarNum;
+    Type type;
+} ExprRet;
+
 extern Class* myProgram;
 extern ClassTable* symbolsTable;
 extern MethodTable* currentLocalTable;
 Type curFunctionType;
 int varNumber, ifNumber, whileNumber, indexNumber, andNumber, orNumber;
 
+void genPreamble();
 void genGlobalVar(VarDecl*);
 void genMethod(MethodDecl*);
 void genLocalVar(VarDecl*);
 void genStmtList(StmtList*);
 void genStmt(Stmt*);
-int buildExpression(Expr*,int,int,char*);
-int genExpr(Expr*);
+ExprRet buildExpression(Expr*,int,int,char*);
+ExprRet genExpr(Expr*);
 
 void getTypeLLVM(char*, Type);
 void getRetTypeLLVM(char*, Type);
 
 void generateCode()
 {
+    genPreamble();
+
     DeclList* aux = myProgram->declList;
     for(; aux != NULL; aux = aux->next)
     {
@@ -34,6 +43,18 @@ void generateCode()
         else if(aux->type == METHODDECL)
             genMethod(aux->methodDecl);
     }
+}
+
+void genPreamble()
+{
+    printf("declare i32 @printf(i8*, ...)\n");
+    printf("declare i32 @atoi(i8*) nounwind readonly\n");
+    printf("\n");
+    printf("@str.d = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
+    printf("@str.f = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
+    printf("@str.f = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
+    printf("@str.bools = global [2 x i8*] [i8* getelementptr inbounds ([7 x i8]* @str.f, i32 0, i32 0), i8* getelementptr inbounds ([7 x i8]* @str.t, i32 0, i32 0)]\n");
+    printf("\n");
 }
 
 void genGlobalVar(VarDecl* varDecl)
@@ -137,7 +158,7 @@ void genStmt(Stmt* stmt)
         genStmtList(stmt->stmtList);
     else if(stmt->type == IFELSE)
     {
-        int compVarNumber = genExpr(stmt->expr1);
+        int compVarNumber = genExpr(stmt->expr1).tempVarNum;
         printf("\tbr i1 %%%d, label %%ifthen%d, label %%ifelse%d\n\n", compVarNumber, ifNumber, ifNumber);
 
         printf("ifthen%d:\n", ifNumber);
@@ -160,7 +181,7 @@ void genStmt(Stmt* stmt)
         {
             char llvmType[MAX_LLVM_TYPE_SIZE];
             getTypeLLVM(llvmType, curFunctionType);
-            int exprVarNumber = genExpr(stmt->expr1);
+            int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
 
             if(curFunctionType == INT_T || curFunctionType == BOOL_T)
                 printf("\tret %s %%%d\n", llvmType, exprVarNumber);
@@ -175,7 +196,7 @@ void genStmt(Stmt* stmt)
     else if(stmt->type == WHILE_T)
     {
         printf("whilestart%d:\n", whileNumber);
-        int exprVarNumber = genExpr(stmt->expr1);
+        int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
         printf("\tbr i1 %%%d, label %%whiledo%d, label %%whileend%d\n\n", exprVarNumber, whileNumber, whileNumber);
 
         printf("whiledo%d:\n", whileNumber);
@@ -186,13 +207,28 @@ void genStmt(Stmt* stmt)
 
         whileNumber++;
     }
-    else if(stmt->type == PRINT_T);
+    else if(stmt->type == PRINT_T)
+    {
+        ExprRet ret = genExpr(stmt->expr1);
+        if(ret.type == INT_T)
+        {
+            printf("call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str2, i32 0, i32 0), i32 %%%d)\n", ret.tempVarNum);
+        }
+        else if(ret.type == BOOL_T)
+        {
+            printf("%%%d = zext i1 %%%d to i32\n", varNumber++, ret.tempVarNum);
+            printf("%%%d = getelementptr inbounds [2 x i8*]* @%s, i32 0, i32 %%%d\n", varNumber++, stmt->id, varNumber);
+            printf("%%%d = load i8** %%d\n", varNumber++, varNumber);
+            printf("call i32 (i8*, ...)* @printf(i8* %%%d)\n", varNumber);
+
+        }
+    }
     else if(stmt->type == STORE)
     {
         int isLocal = 1;
         char varDeclSymbol[5];
         char llvmType[MAX_LLVM_TYPE_SIZE];
-        int exprVarNumber = genExpr(stmt->expr1);
+        int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
 
         Type aux = -1;
         Type varType = getSymbolFromLocal(stmt->id);
@@ -221,8 +257,8 @@ void genStmt(Stmt* stmt)
         char varDeclSymbol[5];
         char llvmType[MAX_LLVM_TYPE_SIZE];
         char llvmType2[MAX_LLVM_TYPE_SIZE];
-        int indexVarNumber = genExpr(stmt->expr1);
-        int exprVarNumber = genExpr(stmt->expr2);
+        int indexVarNumber = genExpr(stmt->expr1).tempVarNum;
+        int exprVarNumber = genExpr(stmt->expr2).tempVarNum;
 
         Type arrayType = getSymbolFromLocal(stmt->id);
         if(arrayType == -1)
@@ -243,7 +279,7 @@ void genStmt(Stmt* stmt)
     }
 }
 
-int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
+ExprRet buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
 {
     int returnValue = varNumber++;
 
@@ -267,7 +303,7 @@ int buildExpression(Expr* expr, int leftExpr, int rightExpr, char* operation)
     return returnValue;
 }
 
-int genExpr(Expr* expr)
+ExprRet genExpr(Expr* expr)
 {
     int returnValue;
     int leftExprId, rightExprId;
