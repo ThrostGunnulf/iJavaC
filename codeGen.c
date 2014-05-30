@@ -211,7 +211,7 @@ void genStmt(Stmt* stmt)
         ExprRet ret = genExpr(stmt->expr1);
         if(ret.type == INT_T)
         {
-            printf("\tcall i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @str.d, i32 0, i32 0), i32 %%%d)\n", ret.tempVarNum);
+            printf("\tcall i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @str.d, i32 0, i32 0), i32 %%%d)\n\n", ret.tempVarNum);
         }
         else if(ret.type == BOOL_T)
         {
@@ -241,14 +241,7 @@ void genStmt(Stmt* stmt)
 
         getTypeLLVM(llvmType, varType);
 
-        if(stmt->expr1->type == INTLIT_T || stmt->expr1->type == BOOLLIT_T)
-        {
-            printf("\tstore %s %d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
-        }
-        else
-        {
-            printf("\tstore %s %%%d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
-        }
+        printf("\tstore %s %%%d, %s* %s%s\n", llvmType, exprVarNumber, llvmType, varDeclSymbol, stmt->id);
     }
     else if(stmt->type == STOREARRAY)
     {
@@ -434,25 +427,35 @@ ExprRet genExpr(Expr* expr)
     }
     else if(expr->type == INTLIT_T)
     {
-        returnValue.tempVarNum = (int) strtol(expr->idOrLit, NULL, 0);
+        printf("\t%%%d = add i32 0, %d\n", varNumber++, (int) strtol(expr->idOrLit, NULL, 0));
+        returnValue.tempVarNum = varNumber -1;
         returnValue.type = INT_T;
     }
     else if(expr->type == BOOLLIT_T)
     {
         if(strcmp(expr->idOrLit, "true") == 0) {
-            returnValue.tempVarNum = 1;
+            printf("\t%%%d = add i1 0, 1\n", varNumber);
         }
         else {
-            returnValue.tempVarNum = 0;
-        }
+            printf("\t%%%d = add i1 0, 0\n", varNumber);
+        }        
+        returnValue.tempVarNum = varNumber++;
         returnValue.type = BOOL_T;
     }
     else if(expr->type == CALL)
     {
 
     }
-    else if(expr->type == PARSEINT_T) {
+    else if(expr->type == PARSEINT_T)
+    {
+        int indexVarNumber = genExpr(expr->expr1).tempVarNum;
 
+        printf("\t%%%d = getelementptr inbounds i8** %%%s, i32 %%%d\n", varNumber++, expr->idOrLit, indexVarNumber);
+        printf("\t%%%d = load i8** %%%d\n", varNumber++, varNumber -1);
+        printf("\t%%%d = call i32 @atoi(i8* %%%d) nounwind readonly\n\n", varNumber++, varNumber -1);
+
+        returnValue.tempVarNum = varNumber -1;
+        returnValue.type = INT_T;
     }
     else if(expr->type == INDEX) {
         char* llvmType[MAX_LLVM_TYPE_SIZE];
