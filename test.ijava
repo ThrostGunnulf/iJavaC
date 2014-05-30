@@ -1,9 +1,9 @@
 class gcd
 {
-	/*static int a, b, c;
+	static int a, b, c;
 	static boolean d, e;
 	static int[] f, g;
-	static boolean[] h, i, j;*/
+	static boolean[] h, i, j;
 	
 	public static void main(String[] args)
 	{
@@ -32,12 +32,7 @@ class gcd
 		}
 		*/
 
-		boolean a , b , c;
-		
-		a = true;
-		b = false;
-
-		c = a && b;
+		a = f[b + g[1]]; 
 
 		return;
 	}
