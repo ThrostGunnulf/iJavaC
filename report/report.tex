@@ -102,9 +102,63 @@ Por fim, o desenvolvimento do compilador deu-se em várias fases bem definidas, 
 
 \section{Análise Léxical}
 
-A primeira fase da construção do compilador consistiu na definição dos tokens aceites pela linguagem, através de expressões regulares, sendo internamente construído pelo \emph{LEX} um autómato.
+A primeira fase da construção do compilador consistiu na definição dos tokens aceites pela linguagem, através de expressões regulares, sendo internamente construído pelo \emph{LEX} um autómato não-determinístico capaz de reconhecer a linguagem.
+
+\subsection{Tokens}
+
+Após terminada a análise sintáticta, obtivemos os seguintes \emph{tokens}:
+
+\begin{itemize}
+	\item \textbf{INT} - \emph{int} 
+	\item \textbf{BOOL} - \emph{boolean}
+	\item \textbf{NEW} - \emph{new}
+	\item \textbf{IF} - \emph{if}
+	\item \textbf{ELSE} - \emph{else}
+	\item \textbf{WHILE} - \emph{while}
+	\item \textbf{PRINT} - \emph{System.out.println}
+	\item \textbf{PARSERINT} - \emph{Integer.parseInt}
+	\item \textbf{CLASS} - \emph{class}
+	\item \textbf{PUBLIC} - \emph{public}
+	\item \textbf{STATIC} - \emph{static}
+	\item \textbf{VOID} - \emph{void}
+	\item \textbf{STRING} - \emph{String}
+	\item \textbf{DOTLENGTH} - \emph{length}
+	\item \textbf{RETURN} - \emph{return}
+	\item \textbf{OCURV} - $($
+	\item \textbf{CCURV} - $)$
+	\item \textbf{OBRACE} - \{
+	\item \textbf{CBRACE} - \}
+	\item \textbf{OSQUARE} - [
+	\item \textbf{CSQUARE} - ]
+	\item \textbf{OP1} - \&\& , $\|$
+	\item \textbf{OP2} - $< , > , == , != , <= , >=$
+	\item \textbf{OP3} - $+ , -$
+	\item \textbf{OP4} - $* , / , \% $
+	\item \textbf{NOT} - !
+	\item \textbf{ASSIGN} - \emph{printf}
+	\item \textbf{SEMIC} - ;
+	\item \textbf{COMMA} - ,
+	\item \textbf{BOOLLIT} - \emph{true false}
+	\item \textbf{ID} - Corresponde a todas as sequências alfanuméricas inciadas por uma letra(maiúscula ou minúscula), que podem conter os caractéres "\$" e "$\_$".
+\end{itemize}
+
+\subsection{Detecção de Erros Lexícais}
+
+A análise lexical é realizada da esquerda para a direita, caractér a caractér, até ao momento em que o autómato atinge um estado morto. Quando este mesmo estado é atingido, o analisador percorre o caminho inverso até encontrar um estado final, estando então encontrado um \emph{token} válido. Caso o analisador não atinja um estado final, então é gerado um erro léxical. Para melhor identificação do erro lexícal, é impressa a linha e a coluna onde se encontra o mesmo. Assim, necessitamos de mecanismos para obter estas informações.
+
+Para tal, existe uma varíavel com o nome \emph{colNo}, responsável por armazenar a coluna actual, sendo esta variável incrementada quando se verifica uma mudança de lina . Relativamente à linha, obtemos o seu valor actual através da varíavel \emph{yylineno}, já implementada pelo \emph{YACC}.
 
 
+
+\subsection{Tratamento dos Comentários}
+
+A linguagem iJava permite a existência de comentários de linha(iniciado por "$\|$") e comentários de bloco(colocados entre "$/* */$").
+
+\section{Análise Semântica}
+
+
+
+\subsection{title}
    
 
 
