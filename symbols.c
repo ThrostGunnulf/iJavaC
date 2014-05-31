@@ -244,6 +244,18 @@ MethodTable* getLocalTable(char* id)
     return NULL;
 }
 
+int isLocalSymbolParam(char* id)
+{
+    MethodTableEntry* aux = currentLocalTable->entries;
+    for(; aux != NULL; aux = aux->next)
+    {
+        if(aux->id && (strcmp(id, aux->id) == 0) && aux->isParam)
+            return 1;
+    }
+
+    return 0;
+}
+
 void errorAlreadyDefined(char* id)
 {
     printf("Symbol %s already defined\n", id);

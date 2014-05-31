@@ -45,6 +45,7 @@ Type getSymbol(char*);
 Type getSymbolFromGlobal(char*);
 Type getSymbolFromLocal(char*);
 Type getSymbolFromLocalOrGlobal(char*);
+int isLocalSymbolParam(char*);
 MethodTable* getLocalTable(char*);
 
 #endif
