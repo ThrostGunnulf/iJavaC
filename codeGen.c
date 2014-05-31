@@ -90,6 +90,7 @@ void genMethod(MethodDecl* methodDecl)
     curFunctionType = methodDecl->type;
     currentLocalTable = getLocalTable(methodDecl->id);
 
+    //If generating main, adapt the type
     char llvmType[MAX_LLVM_TYPE_SIZE];
     if(strcmp(methodDecl->id, "main") == 0)
         getRetTypeLLVM(llvmType, INT_T);
@@ -102,21 +103,37 @@ void genMethod(MethodDecl* methodDecl)
     for(; aux != NULL; aux = aux->next)
     {
         getTypeLLVM(llvmType, aux->type);
-        if(aux->type == STRINGARRAY)
+        if(aux->type == STRINGARRAY) //If generating main, adapt the parameters
             printf("i32 %%.%s", aux->id);
         printf(", %s %%%s", llvmType, aux->id);
     }
 
     printf(")\n{\n");
 
+    //Generate variable definition code
     VarDeclList* aux2 = methodDecl->varDeclList;
     for(; aux2 != NULL; aux2 = aux2->next)
         genLocalVar(aux2->varDecl);
 
+    //Generate statements code
     genStmtList(methodDecl->stmtList);
 
+    //Add a default return
     if(strcmp(methodDecl->id, "main") == 0)
-        printf("ret i32 0\n");
+        printf("\tret i32 0\n");
+    else
+    {
+        if(methodDecl->type == VOID_T)
+            printf("\tret void");
+        else if(methodDecl->type == INT_T)
+            printf("\tret i32 0");
+        else if(methodDecl->type == BOOL_T)
+            printf("\tret i1 0");
+        else if(methodDecl->type == INTARRAY)
+            printf("\tret i32* null");
+        else if(methodDecl->type == BOOLARRAY)
+            printf("\tret i1* null");
+    }
 
     printf("}\n\n");
 }
@@ -453,7 +470,8 @@ ExprRet genExpr(Expr* expr)
     {
         int indexVarNumber = genExpr(expr->expr1).tempVarNum;
 
-        printf("\t%%%d = getelementptr inbounds i8** %%%s, i32 %%%d\n", varNumber++, expr->idOrLit, indexVarNumber);
+        printf("\t%%%d = add i32 %%%d, 1\n", varNumber++, indexVarNumber);
+        printf("\t%%%d = getelementptr inbounds i8** %%%s, i32 %%%d\n", varNumber++, expr->idOrLit, varNumber -1);
         printf("\t%%%d = load i8** %%%d\n", varNumber++, varNumber -1);
         printf("\t%%%d = call i32 @atoi(i8* %%%d) nounwind readonly\n\n", varNumber++, varNumber -1);
 
