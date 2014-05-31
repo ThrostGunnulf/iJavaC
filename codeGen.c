@@ -6,6 +6,7 @@
 #include "symbols.h"
 
 #define MAX_LLVM_TYPE_SIZE 15
+#define MAX_LLVM_OP_STRING 10
 
 typedef struct _ExprRet
 {
@@ -30,6 +31,7 @@ ExprRet buildExpression(Expr*,ExprRet,ExprRet,char*);
 ExprRet genExpr(Expr*);
 
 void getTypeLLVM(char*, Type);
+void getOpLLVM(char*, OpType);
 
 void generateCode()
 {
@@ -56,30 +58,31 @@ void genPreamble()
     printf("@str.t = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
     printf("@str.bools = global [2 x i8*] [i8* getelementptr inbounds ([7 x i8]* @str.f, i32 0, i32 0), i8* getelementptr inbounds ([7 x i8]* @str.t, i32 0, i32 0)]\n");
     printf("\n");
+    printf("%%IntArray = type { i32, i32* }\n");
+    printf("%%BoolArray = type { i32, i1* }\n");
+    printf("\n");
 }
 
 void genGlobalVar(VarDecl* varDecl)
 {
-    char initVal[5];
+    char initVal[20];
     char llvmType[MAX_LLVM_TYPE_SIZE];
     const char llvmOut[] = "@%s = global %s %s\n";
-    const char llvmOutArr[] = "@.%s = global i32 0\n";
-    const char llvmOutInitLenght[] = "\tstore i32 0, i32* @.%s\n";
 
     getTypeLLVM(llvmType, varDecl->type);
 
     if(varDecl->type == INT_T || varDecl->type == BOOL_T)
         sprintf(initVal, "0");
+    else if(varDecl->type == INTARRAY)
+        sprintf(initVal, "{i32 0, i32* null}", llvmType);
+    else if(varDecl->type == BOOLARRAY)
+        sprintf(initVal, "{i32 0, i1* null}", llvmType);
     else
         sprintf(initVal, "null");
 
     IDList *aux = varDecl->idList;
     for(; aux != NULL; aux = aux->next)
-    {
-        if(varDecl->type != INT_T && varDecl->type != BOOL_T)
-            printf(llvmOutArr, aux->id);
         printf(llvmOut, aux->id, llvmType, initVal);
-    }
 
     printf("\n");
 }
@@ -290,29 +293,7 @@ void genStmt(Stmt* stmt)
     }
     else if(stmt->type == STOREARRAY)
     {
-        /*int isLocal = 1;
-        char varDeclSymbol[5];
-        char llvmType[MAX_LLVM_TYPE_SIZE];
-        char llvmType2[MAX_LLVM_TYPE_SIZE];
-        int indexVarNumber = genExpr(stmt->expr1).tempVarNum;
-        int exprVarNumber = genExpr(stmt->expr2).tempVarNum;
 
-        Type arrayType = getSymbolFromLocal(stmt->id);
-        if(arrayType == -1)
-        {
-            isLocal = 0;
-            arrayType = getSymbolFromGlobal(stmt->id);
-        }
-
-        sprintf(varDeclSymbol, isLocal ? "%%" : "@");
-
-        getTypeLLVM(llvmType, arrayType);
-
-        printf("\t%%%d = getelementptr %s %s%s, i32 %%%d\n", indexNumber++, llvmType, varDeclSymbol, stmt->id, indexVarNumber);
-
-        strcpy(llvmType2, llvmType);
-        llvmType2[strlen(llvmType2)-1] = '\0';
-        printf("\tstore %s %%%d, %s %s%s\n", llvmType2, exprVarNumber, llvmType, varDeclSymbol, stmt->id);*/
     }
 }
 
@@ -338,60 +319,7 @@ ExprRet genExpr(Expr* expr)
 
     if(expr->type == BINOP)
     {
-        leftExprId = genExpr(expr->expr1);
-        rightExprId = genExpr(expr->expr2);
-
-        if(expr->op == PLUS)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "add");
-        }
-        else if(expr->op == MINUS)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "sub");
-        }
-        else if(expr->op == MUL)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "mul");
-        }
-        else if(expr->op == DIV)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "sdiv");
-        }
-        else if(expr->op == REM)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "srem");
-        }
-        else if(expr->op == LESSER)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp slt");
-            returnValue.type = BOOL_T;
-        }
-        else if(expr->op == GREATER)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sgt");
-            returnValue.type = BOOL_T;
-        }
-        else if(expr->op == LEQ)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sle");
-            returnValue.type = BOOL_T;
-        }
-        else if(expr->op == GEQ)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp sge");
-            returnValue.type = BOOL_T;
-        }
-        else if(expr->op == DIF)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp ne");
-            returnValue.type = BOOL_T;
-        }
-        else if(expr->op == EQ)
-        {
-            returnValue = buildExpression(expr, leftExprId, rightExprId, "icmp eq");
-            returnValue.type = BOOL_T;
-        }
-        else if(expr->op == AND_T)
+        if(expr->op == AND_T)
         {
             printf("\tbr label %%andstart%d\n\n", andNumber);
             printf("andstart%d:\n", andNumber);
@@ -431,6 +359,18 @@ ExprRet genExpr(Expr* expr)
             returnValue.tempVarNum = varNumber -1;
             returnValue.type = BOOL_T;
         }
+        else
+        {
+            char llvmOp[MAX_LLVM_OP_STRING];
+            getOpLLVM(llvmOp, expr->op);
+
+            leftExprId = genExpr(expr->expr1);
+            rightExprId = genExpr(expr->expr2);
+            returnValue = buildExpression(expr, leftExprId, rightExprId, llvmOp);
+
+            if(expr->op != PLUS && expr->op != MINUS && expr->op != MUL && expr->op != DIV && expr->op != REM)
+                returnValue.type = BOOL_T;
+        }
 
         return returnValue;
     }
@@ -438,7 +378,7 @@ ExprRet genExpr(Expr* expr)
     {
         ExprRet exprId;
 
-        if(expr->op == PLUS) //Not necessary
+        if(expr->op == PLUS)
         {
             exprId = genExpr(expr->expr1);
             returnValue.tempVarNum = varNumber++;
@@ -538,7 +478,7 @@ ExprRet genExpr(Expr* expr)
         for(i=0, aux = expr->argsList; aux != NULL; aux = aux->next, i++)
             args[i] = genExpr(aux->expr);
 
-        printf("\t%%%d =call %s @%s(", varNumber++, llvmType, expr->idOrLit);
+        printf("\t%%%d = call %s @%s(", varNumber++, llvmType, expr->idOrLit);
         aux = expr->argsList;
         if(aux != NULL)
         {
@@ -585,8 +525,14 @@ ExprRet genExpr(Expr* expr)
     return returnValue;
 }
 
-const char* llvmTypes[6] = {"void", "i32", "i1", "i32*", "i1*", "i8**"};
+const char* llvmTypes[6] = {"void", "i32", "i1", "%IntArray", "%BoolArray", "i8**"};
 void getTypeLLVM(char* llvmType, Type type)
 {
     sprintf(llvmType, "%s", llvmTypes[type]);
+}
+
+const char* llvmOps[11] = {"add", "sub", "mul", "sdiv", "srem", "icmp slt", "icmp sgt", "icmp sle", "icmp sge", "icmp ne", "icmp eq"};
+void getOpLLVM(char* llvmOp, OpType opType)
+{
+    sprintf(llvmOp, "%s", llvmOps[opType]);
 }
