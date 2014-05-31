@@ -291,26 +291,15 @@ void genStmt(Stmt* stmt)
 ExprRet buildExpression(Expr* expr, ExprRet leftExpr, ExprRet rightExpr, char* operation)
 {
     ExprRet returnValue;
+    char llvmType[MAX_LLVM_TYPE_SIZE];
 
     returnValue.tempVarNum = varNumber++;
 
-    if(expr->expr1->type == INTLIT_T && expr->expr2->type == INTLIT_T)
-    {
-        printf("\t%%%d = %s i32 %d, %d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
-    }
-    else if(expr->expr1->type == INTLIT_T)
-    {
-        printf("\t%%%d = %s i32 %d, %%%d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
-    }
-    else if(expr->expr2->type == INTLIT_T)
-    {
-        printf("\t%%%d = %s i32 %%%d, %d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
-    }
-    else
-    {
-        printf("\t%%%d = %s i32 %%%d, %%%d\n\n", returnValue.tempVarNum, operation, leftExpr.tempVarNum, rightExpr.tempVarNum);
-    }
-    returnValue.type = INT_T;
+    llvmType = getTypeLLVM(llvmType, leftExpr.type);
+
+    printf("\t%%%d = %s %s %%%d, %%%d\n\n", returnValue.tempVarNum, operation, llvmType, leftExpr.tempVarNum, rightExpr.tempVarNum);
+
+    returnValue.type = leftExpr.type;
 
     return returnValue;
 }
