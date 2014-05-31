@@ -30,7 +30,6 @@ ExprRet buildExpression(Expr*,ExprRet,ExprRet,char*);
 ExprRet genExpr(Expr*);
 
 void getTypeLLVM(char*, Type);
-void getRetTypeLLVM(char*, Type);
 
 void generateCode()
 {
@@ -94,13 +93,25 @@ void genMethod(MethodDecl* methodDecl)
     //If generating main, adapt the type
     char llvmType[MAX_LLVM_TYPE_SIZE];
     if(strcmp(methodDecl->id, "main") == 0)
-        getRetTypeLLVM(llvmType, INT_T);
+        getTypeLLVM(llvmType, INT_T);
     else
-        getRetTypeLLVM(llvmType, methodDecl->type);
+        getTypeLLVM(llvmType, methodDecl->type);
 
     printf("define %s @%s(", llvmType, methodDecl->id);
 
     ParamList* aux = methodDecl->paramList;
+    if(aux != NULL)
+    {
+        getTypeLLVM(llvmType, aux->type);
+        if(aux->type == STRINGARRAY) //If generating main, adapt the parameters
+        {
+            printf("i32 %%%s.len, ", aux->id);
+            argCountName = aux->id;
+        }
+        printf("%s %%%s", llvmType, aux->id);
+
+        aux = aux->next;
+    }
     for(; aux != NULL; aux = aux->next)
     {
         getTypeLLVM(llvmType, aux->type);
@@ -121,8 +132,8 @@ void genMethod(MethodDecl* methodDecl)
         if(aux3->isParam)
         {
             getTypeLLVM(llvmType, aux3->type);
-            printf("%%%s.param = alloca %s\n", aux3->id, llvmType);
-            printf("store %s %%%s, %s* %%%s.param\n", llvmType, aux3->id, llvmType, aux3->id);
+            printf("\t%%%s.param = alloca %s\n", aux3->id, llvmType);
+            printf("\tstore %s %%%s, %s* %%%s.param\n", llvmType, aux3->id, llvmType, aux3->id);
         }
 
     //Generate variable definition code
@@ -511,7 +522,42 @@ ExprRet genExpr(Expr* expr)
     }
     else if(expr->type == CALL)
     {
+        char llvmType[MAX_LLVM_TYPE_SIZE];
+        Type methodType = getMethodFromGlobal(expr->idOrLit);
+        getTypeLLVM(llvmType, methodType);
 
+        //Count the amount of parameters
+        int nParams = 0;
+        ArgsList* aux = expr->argsList;
+        for(; aux != NULL; aux = aux->next)
+            nParams++;
+
+        ExprRet* args = (ExprRet*) malloc(nParams * sizeof(ExprRet));
+
+        int i;
+        for(i=0, aux = expr->argsList; aux != NULL; aux = aux->next, i++)
+            args[i] = genExpr(aux->expr);
+
+        printf("\t%%%d =call %s @%s(", varNumber++, llvmType, expr->idOrLit);
+        aux = expr->argsList;
+        if(aux != NULL)
+        {
+            getTypeLLVM(llvmType, args[0].type);
+            printf("%s %%%d", llvmType, args[0].tempVarNum);
+            aux = aux->next;
+        }
+        for(i=1 ; aux != NULL; aux = aux->next, i++)
+        {
+            getTypeLLVM(llvmType, args[i].type);
+            printf(", %s %%%d", llvmType, args[i].tempVarNum);
+        }
+
+        printf(")\n");
+
+        free(args);
+
+        returnValue.tempVarNum = varNumber -1;
+        returnValue.type = methodType;
     }
     else if(expr->type == PARSEINT_T)
     {
@@ -543,10 +589,4 @@ const char* llvmTypes[6] = {"void", "i32", "i1", "i32*", "i1*", "i8**"};
 void getTypeLLVM(char* llvmType, Type type)
 {
     sprintf(llvmType, "%s", llvmTypes[type]);
-}
-
-const char* llvmRetTypes[6] = {"void", "i32", "i1", "{i32, i32*}", "{i32, i1*}", "i8**"};
-void getRetTypeLLVM(char* llvmType, Type type)
-{
-    sprintf(llvmType, "%s", llvmRetTypes[type]);
 }
