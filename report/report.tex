@@ -34,25 +34,80 @@
 
 \usepackage{graphicx}
 \setlength{\parindent}{1cm}
-\title{\bf{Compiladores - Projecto}\vspace{50mm}\\iJava\vspace{80mm}}
-\author{
-João Ricardo Lourenço, Nº 2011151194\\
-Joaquim Pedro Bento Gonçalves Pratas Leitão, Nº 2011150072}
-\makeindex
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\newcommand*{\titleGM}{\begingroup % Create the command for including the title page in the document
+\hbox{ % Horizontal box
+\hspace*{0.2\textwidth} % Whitespace to the left of the title page
+\rule{1pt}{\textheight} % Vertical line
+\hspace*{0.05\textwidth} % Whitespace between the vertical line and title page text
+\parbox[b]{0.75\textwidth}{ % Paragraph box which restricts text to less than the width of the page
+
+{\noindent\Huge\bfseries Compilador \\[0.5\baselineskip] iJava}\\[2\baselineskip] % Title
+{\large \textit{Projecto da Cadeira de Compiladores}}\\[4\baselineskip] % Tagline or further description
+{\Large \textsc{JOÃO OLIVEIRA - 2010129856}} \\ \\ % Author name
+{\Large \textsc{JOÃO SIMOES - 2011150045}} % Author name
+
+\vspace{0.5\textheight} % Whitespace between the title block and the publisher
+{\noindent FCTUC - Departamento de Engenharia Informática}\\[\baselineskip] % Publisher and logo
+}}
+\endgroup}
+
 \begin{document}
 
-\maketitle
-\centerline{\textbf{Relatório}}
-\pagebreak
-
-\printindex
-
-\renewcommand*\contentsname{Índice}
-\tableofcontents
-
-\pagebreak
+\titleGM
 
 \section{Inrodução}
+
+Este projecto consistiu no desenvolvimento de um compilado para a linguagem $iJava$. Esta línguagem apresenta diversas caracteristicas específicas a serem descritas de seguida.
+
+Uma das características prende-se com o facto de cada programa conter uma única classe. Esta classe pode ter incluídas variáveis estáticas e métodos \emph{public static}, assim como variáveis locais. Para além disto, é mandatória a presença de um método \emph{main}, método este a ser chamado aquando da execução do programa. Este mesmo método tem como parâmetro, por defeito, um array de \emph{Strings}, contendo os parâmetos de entrada.
+
+É ainda possível implementar expressões aritméticas e lógicas, assim como operações de atribuição, relacionais e controlo. (\emph{if-else} e \emph{while} )
+
+Relativamente aos tipos de variáveis existentes na linguagem, é possivel usar varíaveis do tipo \emph{Integer} e \emph{Boolean}. É ainda possível criar arrays unidimensionais dos tipo apresentados anteriormente.
+
+Por fim, o desenvolvimento do compilador deu-se em várias fases bem definidas, fases estas que apresentamos de seguida.
+
+\begin{description}
+	\item[Fase 1] Análise Lexical
+		\begin{itemize}
+			\item Identificação dos tokens aceites pela linguagem e tradução dos mesmo para a linguagem \emph{LEX}. 
+		\end{itemize}
+	\item[Fase 2] Análise Sintática
+		\begin{itemize}
+			\item Tradução da gramática dada para a linguagem \emph{YACC} e resolução de conflitos e ambiguidades;
+			\item Estruturas de dados a serem criadas de forma a representar os nós da Árvore de Sintaxe Abstracta;
+			\item Definição de enumerações de forma a representar os diversos tipos de operações,  expressões, \emph{statments}, entre outros;
+			\item Implementação das funções responsáveis pela construção da AST;
+			\item Deteção de erros sintáticos.
+		\end{itemize}
+	\item[Fase 3] Análise Semântica
+		\begin{itemize}
+			\item Definição das estruturas de dados a serem utilizadas para a criação da tabela de símbolos;
+			\item Implementação dos procedimentos responsáveis pelas inserções na tabela de símbolos;
+			\item Detecção de erros ao nível semântico. 
+		\end{itemize}
+	\item[Fase 4] Geração de código intermédio
+		\begin{itemize}
+			\item Implemententação das funções responsáveis pela geração de código \emph{LLVM}.
+		\end{itemize}
+\end{description}
+
+\newpage
+
+\section{Análise Léxical}
+
+A primeira fase da construção do compilador consistiu na definição dos tokens aceites pela linguagem, através de expressões regulares, sendo internamente construído pelo \emph{LEX} um autómato.
+
+
+   
+
+
 
 
 \end{document}
