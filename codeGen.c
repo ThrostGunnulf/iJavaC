@@ -52,6 +52,7 @@ void genPreamble()
 {
     printf("declare i32 @printf(i8*, ...)\n");
     printf("declare i32 @atoi(i8*) nounwind readonly\n");
+    printf("declare noalias i8* @calloc(i32, i32) nounwind\n");
     printf("\n");
     printf("@str.d = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
     printf("@str.f = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
@@ -111,7 +112,7 @@ void genMethod(MethodDecl* methodDecl)
             printf("i32 %%%s.len, ", aux->id);
             argCountName = aux->id;
         }
-        printf("%s %%%s", llvmType, aux->id);
+        printf("%s %%%s.param", llvmType, aux->id);
 
         aux = aux->next;
     }
@@ -123,7 +124,7 @@ void genMethod(MethodDecl* methodDecl)
             printf("i32 %%%s.len", aux->id);
             argCountName = aux->id;
         }
-        printf(", %s %%%s", llvmType, aux->id);
+        printf(", %s %%%s.param", llvmType, aux->id);
     }
 
     printf(")\n{\n");
@@ -135,8 +136,8 @@ void genMethod(MethodDecl* methodDecl)
         if(aux3->isParam)
         {
             getTypeLLVM(llvmType, aux3->type);
-            printf("\t%%%s.param = alloca %s\n", aux3->id, llvmType);
-            printf("\tstore %s %%%s, %s* %%%s.param\n", llvmType, aux3->id, llvmType, aux3->id);
+            printf("\t%%%s = alloca %s\n", aux3->id, llvmType);
+            printf("\tstore %s %%%s.param, %s* %%%s\n", llvmType, aux3->id, llvmType, aux3->id);
         }
 
     //Generate variable definition code
@@ -171,21 +172,12 @@ void genLocalVar(VarDecl* varDecl)
 {
     char llvmType[MAX_LLVM_TYPE_SIZE];
     const char llvmOut[] = "\t%%%s = alloca %s\n";
-    const char llvmOutArr[] = "\t%%.%s = alloca i32\n";
-    const char llvmOutInitLenght[] = "\tstore i32 0, i32* %%.%s\n";
 
     getTypeLLVM(llvmType, varDecl->type);
 
     IDList *aux = varDecl->idList;
     for(; aux != NULL; aux = aux->next)
-    {
-        if(varDecl->type != INT_T && varDecl->type != BOOL_T)
-        {
-            printf(llvmOutArr, aux->id);
-            printf(llvmOutInitLenght, aux->id);
-        }
         printf(llvmOut, aux->id, llvmType);
-    }
 
     printf("\n");
 }
@@ -203,22 +195,22 @@ void genStmt(Stmt* stmt)
         genStmtList(stmt->stmtList);
     else if(stmt->type == IFELSE)
     {
-        int compVarNumber = genExpr(stmt->expr1).tempVarNum;
-        printf("\tbr i1 %%%d, label %%ifthen%d, label %%ifelse%d\n\n", compVarNumber, ifNumber, ifNumber);
+        int thisIfElseNumber = ifNumber++;
 
-        printf("ifthen%d:\n", ifNumber);
+        int compVarNumber = genExpr(stmt->expr1).tempVarNum;
+        printf("\tbr i1 %%%d, label %%ifthen%d, label %%ifelse%d\n\n", compVarNumber, thisIfElseNumber, thisIfElseNumber);
+
+        printf("ifthen%d:\n", thisIfElseNumber);
         if(stmt->stmt1 != NULL)
             genStmt(stmt->stmt1);
-        printf("\tbr label %%ifend%d\n\n", ifNumber);
+        printf("\tbr label %%ifend%d\n\n", thisIfElseNumber);
 
-        printf("ifelse%d:\n", ifNumber);
+        printf("ifelse%d:\n", thisIfElseNumber);
         if(stmt->stmt2 != NULL)
             genStmt(stmt->stmt2);
-        printf("\tbr label %%ifend%d\n\n", ifNumber);
+        printf("\tbr label %%ifend%d\n\n", thisIfElseNumber);
 
-        printf("ifend%d:\n", ifNumber);
-
-        ifNumber++;
+        printf("ifend%d:\n", thisIfElseNumber);
     }
     else if(stmt->type == RETURN_T)
     {
@@ -228,31 +220,28 @@ void genStmt(Stmt* stmt)
             getTypeLLVM(llvmType, curFunctionType);
             int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
 
-            if(curFunctionType == INT_T || curFunctionType == BOOL_T)
-                printf("\tret %s %%%d\n", llvmType, exprVarNumber);
-            else
-            {
-                printf("\tret i32 %%.%d, %s %%%d\n", exprVarNumber, llvmType, exprVarNumber);
-            }
+            printf("\tret %s %%%d\n", llvmType, exprVarNumber);
         }
         else
             printf("\t ret void\n");
+
+        varNumber++;
     }
     else if(stmt->type == WHILE_T)
     {
-        printf("\tbr label %%whilestart%d\n\n", whileNumber);
-        printf("whilestart%d:\n", whileNumber);
-        int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
-        printf("\tbr i1 %%%d, label %%whiledo%d, label %%whileend%d\n\n", exprVarNumber, whileNumber, whileNumber);
+        int thisWhileNum = whileNumber++;
 
-        printf("whiledo%d:\n", whileNumber);
+        printf("\tbr label %%whilestart%d\n\n", thisWhileNum);
+        printf("whilestart%d:\n", thisWhileNum);
+        int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
+        printf("\tbr i1 %%%d, label %%whiledo%d, label %%whileend%d\n\n", exprVarNumber, thisWhileNum, thisWhileNum);
+
+        printf("whiledo%d:\n", thisWhileNum);
         if(stmt->stmt1 != NULL)
             genStmt(stmt->stmt1);
-        printf("\tbr label %%whilestart%d\n", whileNumber);
+        printf("\tbr label %%whilestart%d\n", thisWhileNum);
 
-        printf("\nwhileend%d:\n", whileNumber);
-
-        whileNumber++;
+        printf("\nwhileend%d:\n", thisWhileNum);
     }
     else if(stmt->type == PRINT_T)
     {
@@ -293,6 +282,36 @@ void genStmt(Stmt* stmt)
     }
     else if(stmt->type == STOREARRAY)
     {
+        int isLocal = 1;
+        char varDeclSymbol[5];
+        char llvmType1[MAX_LLVM_TYPE_SIZE];
+        char llvmType2[MAX_LLVM_TYPE_SIZE];
+        int indexVarNumber = genExpr(stmt->expr1).tempVarNum;
+        int exprVarNumber = genExpr(stmt->expr2).tempVarNum;
+
+        Type aux = -1;
+        Type varType = getSymbolFromLocal(stmt->id);
+        if(varType == aux)
+        {
+            isLocal = 0;
+            varType = getSymbolFromGlobal(stmt->id);
+        }
+
+        sprintf(varDeclSymbol, isLocal ? "%%" : "@");
+        getTypeLLVM(llvmType1, varType);
+
+        Type type;
+        if(varType == INTARRAY)
+            type = INT_T;
+        else if (varType == BOOLARRAY)
+            type = BOOL_T;
+        getTypeLLVM(llvmType2, type);
+
+        printf("\t%%%d = load %s* %s%s\n", varNumber++, llvmType1, varDeclSymbol, stmt->id);
+
+        printf("\t%%%d = extractvalue %s %%%d, 1\n", varNumber++, llvmType1, varNumber -1);
+        printf("\t%%%d = getelementptr %s* %%%d, i32 %%%d\n", varNumber++, llvmType2, varNumber -1, indexVarNumber);
+        printf("\tstore %s %%%d, %s* %%%d\n", llvmType2, exprVarNumber, llvmType2, varNumber -1);
 
     }
 }
@@ -321,41 +340,43 @@ ExprRet genExpr(Expr* expr)
     {
         if(expr->op == AND_T)
         {
-            printf("\tbr label %%andstart%d\n\n", andNumber);
-            printf("andstart%d:\n", andNumber);
+            int thisAndNumber = andNumber++;
+
+            printf("\tbr label %%andstart%d\n\n", thisAndNumber);
+            printf("andstart%d:\n", thisAndNumber);
 
             leftExprId = genExpr(expr->expr1);
             printf("\t%%%d = icmp eq i1 0, %%%d\n", varNumber++, leftExprId.tempVarNum);
-            printf("\tbr i1 %%%d, label %%andend%d, label %%anddo%d\n", varNumber-1, andNumber, andNumber);
+            printf("\tbr i1 %%%d, label %%andend%d, label %%anddo%d\n", varNumber-1, thisAndNumber, thisAndNumber);
 
-            printf("anddo%d:\n", andNumber);
+            printf("anddo%d:\n", thisAndNumber);
             rightExprId = genExpr(expr->expr2);
-            printf("\tbr label %%andend%d\n\n", andNumber);
+            printf("\tbr label %%andend%d\n\n", thisAndNumber);
 
-            printf("andend%d:\n", andNumber);
-            printf("\t%%%d = phi i1 [ false, %%andstart%d ], [ %%%d, %%anddo%d ]\n", varNumber++, andNumber, rightExprId.tempVarNum, andNumber);
+            printf("andend%d:\n", thisAndNumber);
+            printf("\t%%%d = phi i1 [ false, %%andstart%d ], [ %%%d, %%anddo%d ]\n", varNumber++, thisAndNumber, rightExprId.tempVarNum, thisAndNumber);
 
-            andNumber++;
             returnValue.tempVarNum = varNumber -1;
             returnValue.type = BOOL_T;
         }
         else if(expr->op == OR_T)
         {
-            printf("\tbr label %%orstart%d\n\n", orNumber);
-            printf("orstart%d:\n", orNumber);
+            int thisOrNumber = orNumber++;
+
+            printf("\tbr label %%orstart%d\n\n", thisOrNumber);
+            printf("orstart%d:\n", thisOrNumber);
 
             leftExprId = genExpr(expr->expr1);
             printf("\t%%%d = icmp eq i1 1, %%%d\n", varNumber++, leftExprId.tempVarNum);
-            printf("\tbr i1 %%%d, label %%orend%d, label %%ordo%d\n", varNumber-1, orNumber, orNumber);
+            printf("\tbr i1 %%%d, label %%orend%d, label %%ordo%d\n", varNumber-1, thisOrNumber, thisOrNumber);
 
-            printf("ordo%d:\n", orNumber);
+            printf("ordo%d:\n", thisOrNumber);
             rightExprId = genExpr(expr->expr2);
-            printf("\tbr label %%orend%d\n\n", orNumber);
+            printf("\tbr label %%orend%d\n\n", thisOrNumber);
 
-            printf("orend%d:\n", orNumber);
-            printf("\t%%%d = phi i1 [ true, %%orstart%d ], [ %%%d, %%ordo%d ]\n", varNumber++, orNumber, rightExprId.tempVarNum, orNumber);
+            printf("orend%d:\n", thisOrNumber);
+            printf("\t%%%d = phi i1 [ true, %%orstart%d ], [ %%%d, %%ordo%d ]\n", varNumber++, thisOrNumber, rightExprId.tempVarNum, thisOrNumber);
 
-            orNumber++;
             returnValue.tempVarNum = varNumber -1;
             returnValue.type = BOOL_T;
         }
@@ -412,7 +433,10 @@ ExprRet genExpr(Expr* expr)
             }
             else
             {
-                //TODO: implement this!
+                char llvmType[MAX_LLVM_TYPE_SIZE];
+                getTypeLLVM(llvmType, leftExprId.type);
+
+                printf("\t%%%d = extractvalue %s %%%d, 0\n", varNumber++, llvmType, varNumber -1);
             }
 
             returnValue.tempVarNum = varNumber -1;
@@ -429,10 +453,7 @@ ExprRet genExpr(Expr* expr)
         if(idType != -1)
         {
             getTypeLLVM(llvmType, idType);
-            if(isLocalSymbolParam(expr->idOrLit))
-                printf("\t%%%d = load %s* %%%s.param\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
-            else
-                printf("\t%%%d = load %s* %%%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
+            printf("\t%%%d = load %s* %%%s\n\n", returnValue.tempVarNum, llvmType, expr->idOrLit);
         }
         else
         {
@@ -504,7 +525,8 @@ ExprRet genExpr(Expr* expr)
         int indexVarNumber = genExpr(expr->expr1).tempVarNum;
 
         printf("\t%%%d = add i32 %%%d, 1\n", varNumber++, indexVarNumber);
-        printf("\t%%%d = getelementptr inbounds i8** %%%s, i32 %%%d\n", varNumber++, expr->idOrLit, varNumber -1);
+        printf("\t%%%d = load i8*** %%%s\n", varNumber++, expr->idOrLit);
+        printf("\t%%%d = getelementptr inbounds i8** %%%d, i32 %%%d\n", varNumber++, varNumber -1, varNumber -2);
         printf("\t%%%d = load i8** %%%d\n", varNumber++, varNumber -1);
         printf("\t%%%d = call i32 @atoi(i8* %%%d) nounwind readonly\n\n", varNumber++, varNumber -1);
 
@@ -513,13 +535,51 @@ ExprRet genExpr(Expr* expr)
     }
     else if(expr->type == INDEX)
     {
+        Type type;
+        char llvmType1[MAX_LLVM_TYPE_SIZE];
+        char llvmType2[MAX_LLVM_TYPE_SIZE];
 
+        leftExprId = genExpr(expr->expr1);
+        rightExprId = genExpr(expr->expr2);
+
+        getTypeLLVM(llvmType1, leftExprId.type);
+
+        if(leftExprId.type == INTARRAY)
+            type = INT_T;
+        else if(leftExprId.type == BOOLARRAY)
+            type = BOOL_T;
+        getTypeLLVM(llvmType2, type);
+
+        printf("\t%%%d = extractvalue %s %%%d, 1\n", varNumber++, llvmType1, leftExprId.tempVarNum);
+        printf("\t%%%d = getelementptr %s* %%%d, i32 %%%d\n", varNumber++, llvmType2, varNumber -1, rightExprId.tempVarNum);
+        printf("\t%%%d = load %s* %%%d\n", varNumber++, llvmType2, varNumber -1);
+
+        returnValue.tempVarNum = varNumber -1;
+        returnValue.type = type;
     }
-    else if(expr->type == NEWINTARR) {
+    else if(expr->type == NEWINTARR)
+    {
+        leftExprId = genExpr(expr->expr1);
 
+        printf("\t%%%d = call noalias i8* @calloc(i32 %%%d, i32 4) nounwind\n\n", varNumber++, leftExprId.tempVarNum);
+        printf("\t%%%d = bitcast i8* %%%d to i32*\n", varNumber++, varNumber -1);
+        printf("\t%%%d = insertvalue %%IntArray undef, i32 %%%d, 0\n", varNumber++, leftExprId.tempVarNum);
+        printf("\t%%%d = insertvalue %%IntArray %%%d, i32* %%%d, 1\n", varNumber++, varNumber -1, varNumber -2);
+
+        returnValue.tempVarNum = varNumber -1;
+        returnValue.type = INTARRAY;
     }
-    else if(expr->type == NEWBOOLARR) {
+    else if(expr->type == NEWBOOLARR)
+    {
+        leftExprId = genExpr(expr->expr1);
 
+        printf("\t%%%d = call noalias i8* @calloc(i32 %%%d, i32 1) nounwind\n\n", varNumber++, leftExprId.tempVarNum);
+        printf("\t%%%d = bitcast i8* %%%d to i1*\n", varNumber++, varNumber -1);
+        printf("\t%%%d = insertvalue %%BoolArray undef, i32 %%%d, 0\n", varNumber++, leftExprId.tempVarNum);
+        printf("\t%%%d = insertvalue %%BoolArray %%%d, i1* %%%d, 1\n", varNumber++, varNumber -1, varNumber -2);
+
+        returnValue.tempVarNum = varNumber -1;
+        returnValue.type = BOOLARRAY;
     }
 
     return returnValue;
