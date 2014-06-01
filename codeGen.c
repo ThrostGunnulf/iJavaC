@@ -75,9 +75,9 @@ void genGlobalVar(VarDecl* varDecl)
     if(varDecl->type == INT_T || varDecl->type == BOOL_T)
         sprintf(initVal, "0");
     else if(varDecl->type == INTARRAY)
-        sprintf(initVal, "{i32 0, i32* null}", llvmType);
+        sprintf(initVal, "{i32 0, i32* null}");
     else if(varDecl->type == BOOLARRAY)
-        sprintf(initVal, "{i32 0, i1* null}", llvmType);
+        sprintf(initVal, "{i32 0, i1* null}");
     else
         sprintf(initVal, "null");
 
