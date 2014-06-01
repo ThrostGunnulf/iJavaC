@@ -19,6 +19,7 @@ extern ClassTable* symbolsTable;
 extern MethodTable* currentLocalTable;
 char* argCountName;
 Type curFunctionType;
+char* curFunctionName;
 int varNumber, ifNumber, whileNumber, indexNumber, andNumber, orNumber;
 
 void genPreamble();
@@ -92,6 +93,7 @@ void genMethod(MethodDecl* methodDecl)
 {
     varNumber = indexNumber = 1;
     curFunctionType = methodDecl->type;
+    curFunctionName = methodDecl->id;
     currentLocalTable = getLocalTable(methodDecl->id);
 
     //If generating main, adapt the type
@@ -223,7 +225,12 @@ void genStmt(Stmt* stmt)
             printf("\tret %s %%%d\n", llvmType, exprVarNumber);
         }
         else
-            printf("\t ret void\n");
+        {
+            if(strcmp(curFunctionName, "main") != 0)
+                printf("\tret void\n");
+            else
+                printf("\tret i32 0\n");
+        }
 
         varNumber++;
     }
