@@ -59,8 +59,8 @@ void genPreamble()
     printf("@str.t = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
     printf("@str.bools = global [2 x i8*] [i8* getelementptr inbounds ([7 x i8]* @str.f, i32 0, i32 0), i8* getelementptr inbounds ([7 x i8]* @str.t, i32 0, i32 0)]\n");
     printf("\n");
-    printf("%%IntArray = type { i32, i32* }\n");
-    printf("%%BoolArray = type { i32, i1* }\n");
+    printf("%%Int.Array = type { i32, i32* }\n");
+    printf("%%Bool.Array = type { i32, i1* }\n");
     printf("\n");
 }
 
@@ -154,15 +154,15 @@ void genMethod(MethodDecl* methodDecl)
     else
     {
         if(methodDecl->type == VOID_T)
-            printf("\tret void");
+            printf("\tret void\n");
         else if(methodDecl->type == INT_T)
-            printf("\tret i32 0");
+            printf("\tret i32 0\n");
         else if(methodDecl->type == BOOL_T)
-            printf("\tret i1 0");
+            printf("\tret i1 0\n");
         else if(methodDecl->type == INTARRAY)
-            printf("\tret i32* null");
+            printf("\tret %%Int.Array {i32 0, i32* null}\n");
         else if(methodDecl->type == BOOLARRAY)
-            printf("\tret i1* null");
+            printf("\tret %%Bool.Array {i32 0, i1* null}\n");
     }
 
     printf("}\n\n");
@@ -563,8 +563,8 @@ ExprRet genExpr(Expr* expr)
 
         printf("\t%%%d = call noalias i8* @calloc(i32 %%%d, i32 4) nounwind\n\n", varNumber++, leftExprId.tempVarNum);
         printf("\t%%%d = bitcast i8* %%%d to i32*\n", varNumber++, varNumber -1);
-        printf("\t%%%d = insertvalue %%IntArray undef, i32 %%%d, 0\n", varNumber++, leftExprId.tempVarNum);
-        printf("\t%%%d = insertvalue %%IntArray %%%d, i32* %%%d, 1\n", varNumber++, varNumber -1, varNumber -2);
+        printf("\t%%%d = insertvalue %%Int.Array undef, i32 %%%d, 0\n", varNumber++, leftExprId.tempVarNum);
+        printf("\t%%%d = insertvalue %%Int.Array %%%d, i32* %%%d, 1\n", varNumber++, varNumber -1, varNumber -2);
 
         returnValue.tempVarNum = varNumber -1;
         returnValue.type = INTARRAY;
@@ -575,8 +575,8 @@ ExprRet genExpr(Expr* expr)
 
         printf("\t%%%d = call noalias i8* @calloc(i32 %%%d, i32 1) nounwind\n\n", varNumber++, leftExprId.tempVarNum);
         printf("\t%%%d = bitcast i8* %%%d to i1*\n", varNumber++, varNumber -1);
-        printf("\t%%%d = insertvalue %%BoolArray undef, i32 %%%d, 0\n", varNumber++, leftExprId.tempVarNum);
-        printf("\t%%%d = insertvalue %%BoolArray %%%d, i1* %%%d, 1\n", varNumber++, varNumber -1, varNumber -2);
+        printf("\t%%%d = insertvalue %%Bool.Array undef, i32 %%%d, 0\n", varNumber++, leftExprId.tempVarNum);
+        printf("\t%%%d = insertvalue %%Bool.Array %%%d, i1* %%%d, 1\n", varNumber++, varNumber -1, varNumber -2);
 
         returnValue.tempVarNum = varNumber -1;
         returnValue.type = BOOLARRAY;
@@ -585,7 +585,7 @@ ExprRet genExpr(Expr* expr)
     return returnValue;
 }
 
-const char* llvmTypes[6] = {"void", "i32", "i1", "%IntArray", "%BoolArray", "i8**"};
+const char* llvmTypes[6] = {"void", "i32", "i1", "%Int.Array", "%Bool.Array", "i8**"};
 void getTypeLLVM(char* llvmType, Type type)
 {
     sprintf(llvmType, "%s", llvmTypes[type]);
