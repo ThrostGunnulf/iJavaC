@@ -1,40 +1,14 @@
 % !TeX spellcheck = pt_PT
 \documentclass[11pt,a4paper]{article}
-\usepackage{etex}
-\reserveinserts{28}
-
-\usepackage[utf8]{inputenc}
-
-\usepackage{hyperref}
-\usepackage{amsthm}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsfonts}
-\usepackage[portuguese]{babel}
-\usepackage{pictex}
-\usepackage[dvips]{graphics}
-\usepackage{enumerate}
-\usepackage{color}
-\usepackage[usenames,dvipsnames]{xcolor}
-
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsfonts}
-\usepackage[portuguese]{babel}
-\usepackage{pictex}
-\usepackage[dvips]{graphics}
-\usepackage{enumerate}
-\usepackage{color}
-\usepackage{indentfirst}
-\usepackage{listings}
-\usepackage{tabularx}
-\usepackage{multirow}
-\usepackage{float}
-\usepackage{makeidx}
 
 \usepackage[margin=1.3in]{geometry}
-
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst}
 \usepackage{graphicx}
+\usepackage{listings}
+
+
 \setlength{\parindent}{1cm}
 
 
@@ -51,8 +25,8 @@
 
 {\noindent\Huge\bfseries Compilador \\[0.5\baselineskip] iJava}\\[2\baselineskip] % Title
 {\large \textit{Projecto da Cadeira de Compiladores}}\\[4\baselineskip] % Tagline or further description
-{\Large \textsc{JOÃO OLIVEIRA - 2010129856}} \\ \\ % Author name
-{\Large \textsc{JOÃO SIMOES - 2011150045}} % Author name
+{\Large \textsc{João Oliveira - 2010129856}} \\ \\ % Author name
+{\Large \textsc{João Simões - 2011150045}} % Author name
 
 \vspace{0.5\textheight} % Whitespace between the title block and the publisher
 {\noindent FCTUC - Departamento de Engenharia Informática}\\[\baselineskip] % Publisher and logo
@@ -63,40 +37,39 @@
 
 \titleGM
 
-\section{Inrodução}
+\section{Introdução}
 
-Este projecto consistiu no desenvolvimento de um compilado para a linguagem $iJava$. Esta línguagem apresenta diversas caracteristicas específicas a serem descritas de seguida.
+Este projecto consistiu no desenvolvimento de um compilador para a linguagem \textit{iJava}, de imperative \textit{Java}. Esta linguagem é uma restrição da linguagem \textit{Java}, para facilitar a implementação do compilador.
 
-Uma das características prende-se com o facto de cada programa conter uma única classe. Esta classe pode ter incluídas variáveis estáticas e métodos \emph{public static}, assim como variáveis locais. Para além disto, é mandatória a presença de um método \emph{main}, método este a ser chamado aquando da execução do programa. Este mesmo método tem como parâmetro, por defeito, um array de \emph{Strings}, contendo os parâmetos de entrada.
+Uma das características da linguagem é o facto de cada ficheiro conter uma única classe, sendo que cada programa consiste apenas num ficheiro. Uma classe pode ter variáveis globais e métodos, que por sua vez podem ter variáveis locais. Para além disto, é obrigatória a existência de um método \textit{main}, método este que será a função de entrada do programa. Este mesmo método tem como parâmetro, por defeito, um array de \textit{Strings}, contendo os parâmetos de entrada, tal como em \textit{Java}.
 
-É ainda possível implementar expressões aritméticas e lógicas, assim como operações de atribuição, relacionais e controlo. (\emph{if-else} e \emph{while} )
+É ainda possível implementar expressões aritméticas, lógicas e relacionais, assim como statements de atribuição, indexação e controlo (\textit{if-else} e \textit{while}).
 
-Relativamente aos tipos de variáveis existentes na linguagem, é possivel usar varíaveis do tipo \emph{Integer} e \emph{Boolean}. É ainda possível criar arrays unidimensionais dos tipo apresentados anteriormente.
+Relativamente aos tipos de variáveis existentes na linguagem, é possivel usar varíaveis do tipo \textit{int} e \textit{boolean}. É ainda possível criar arrays unidimensionais dos tipo apresentados anteriormente.
 
-Por fim, o desenvolvimento do compilador deu-se em várias fases bem definidas, fases estas que apresentamos de seguida.
+Por fim, o desenvolvimento do compilador fez-se em várias fases bem definidas, fases essas que apresentamos de seguida.
 
 \begin{description}
 	\item[Fase 1] Análise Lexical
 		\begin{itemize}
-			\item Identificação dos tokens aceites pela linguagem e tradução dos mesmo para a linguagem \emph{LEX}. 
+			\item Identificação dos tokens aceites pela linguagem, recorrendo ao \textit{LEX}. Nesta ferramenta definimos os tokens através de expressões regulares. 
 		\end{itemize}
 	\item[Fase 2] Análise Sintática
 		\begin{itemize}
-			\item Tradução da gramática dada para a linguagem \emph{YACC} e resolução de conflitos e ambiguidades;
-			\item Estruturas de dados a serem criadas de forma a representar os nós da Árvore de Sintaxe Abstracta;
-			\item Definição de enumerações de forma a representar os diversos tipos de operações,  expressões, \emph{statments}, entre outros;
+			\item Tradução da gramática dada para a linguagem \textit{YACC} e resolução de conflitos e ambiguidades;
+			\item Criação das estruturas de dados que representam os nós da Árvore de Sintaxe Abstracta;
 			\item Implementação das funções responsáveis pela construção da AST;
 			\item Deteção de erros sintáticos.
 		\end{itemize}
 	\item[Fase 3] Análise Semântica
 		\begin{itemize}
-			\item Definição das estruturas de dados a serem utilizadas para a criação da tabela de símbolos;
+			\item Criação das estruturas de dados a utilizar para a construção da tabela de símbolos;
 			\item Implementação dos procedimentos responsáveis pelas inserções na tabela de símbolos;
-			\item Detecção de erros ao nível semântico. 
+			\item Detecção de erros semânticos.
 		\end{itemize}
 	\item[Fase 4] Geração de código intermédio
 		\begin{itemize}
-			\item Implemententação das funções responsáveis pela geração de código \emph{LLVM}.
+			\item Implemententação das funções responsáveis pela geração de código \textit{LLVM}.
 		\end{itemize}
 \end{description}
 
@@ -104,28 +77,28 @@ Por fim, o desenvolvimento do compilador deu-se em várias fases bem definidas, 
 
 \section{Análise Léxical}
 
-A primeira fase da construção do compilador consistiu na definição dos tokens aceites pela linguagem, através de expressões regulares, sendo internamente construído pelo \emph{LEX} um autómato não-determinístico capaz de reconhecer a linguagem.
+A primeira fase da construção do compilador consistiu na definição dos tokens aceites pela linguagem, através de expressões regulares. Para este efeito usou-se o \textit{LEX}, que constrói internamente um autómato determinístico capaz de reconhecer esses tokens.
 
 \subsection{Tokens}
 
-Após terminada a análise sintáticta, obtivemos os seguintes \emph{tokens}:
+Após terminada a fase de análise lexical, obtivemos os seguintes \textit{tokens}:
 
 \begin{itemize}
-	\item \textbf{INT} - \emph{int} 
-	\item \textbf{BOOL} - \emph{boolean}
-	\item \textbf{NEW} - \emph{new}
-	\item \textbf{IF} - \emph{if}
-	\item \textbf{ELSE} - \emph{else}
-	\item \textbf{WHILE} - \emph{while}
-	\item \textbf{PRINT} - \emph{System.out.println}
-	\item \textbf{PARSERINT} - \emph{Integer.parseInt}
-	\item \textbf{CLASS} - \emph{class}
-	\item \textbf{PUBLIC} - \emph{public}
-	\item \textbf{STATIC} - \emph{static}
-	\item \textbf{VOID} - \emph{void}
-	\item \textbf{STRING} - \emph{String}
-	\item \textbf{DOTLENGTH} - \emph{length}
-	\item \textbf{RETURN} - \emph{return}
+	\item \textbf{INT} - \textit{int} 
+	\item \textbf{BOOL} - \textit{boolean}
+	\item \textbf{NEW} - \textit{new}
+	\item \textbf{IF} - \textit{if}
+	\item \textbf{ELSE} - \textit{else}
+	\item \textbf{WHILE} - \textit{while}
+	\item \textbf{PRINT} - \textit{System.out.println}
+	\item \textbf{PARSEINT} - \textit{Integer.parseInt}
+	\item \textbf{CLASS} - \textit{class}
+	\item \textbf{PUBLIC} - \textit{public}
+	\item \textbf{STATIC} - \textit{static}
+	\item \textbf{VOID} - \textit{void}
+	\item \textbf{STRING} - \textit{String}
+	\item \textbf{DOTLENGTH} - \textit{.length}
+	\item \textbf{RETURN} - \textit{return}
 	\item \textbf{OCURV} - $($
 	\item \textbf{CCURV} - $)$
 	\item \textbf{OBRACE} - \{
@@ -137,49 +110,52 @@ Após terminada a análise sintáticta, obtivemos os seguintes \emph{tokens}:
 	\item \textbf{OP3} - $+ , -$
 	\item \textbf{OP4} - $* , / , \% $
 	\item \textbf{NOT} - !
-	\item \textbf{ASSIGN} - \emph{printf}
+	\item \textbf{ASSIGN} - $=$
 	\item \textbf{SEMIC} - ;
 	\item \textbf{COMMA} - ,
-	\item \textbf{BOOLLIT} - \emph{true false}
-	\item \textbf{ID} - Corresponde a todas as sequências alfanuméricas inciadas por uma letra(maiúscula ou minúscula), que podem conter os caractéres "\$" e "$\_$".
+	\item \textbf{BOOLLIT} - \textit{true, false}
+	\item \textbf{ID} - Corresponde a todas as sequências alfanuméricas inciadas por uma letra (maiúscula ou minúscula), que podem conter os caracteres "\$" e "$\_$".
 \end{itemize}
 
-\subsection{Detecção de Erros Lexícais}
+\subsection{Detecção de Erros Lexicais}
 
-A análise lexical é realizada da esquerda para a direita, caractér a caractér, até ao momento em que o autómato atinge um estado morto. Quando este mesmo estado é atingido, o analisador percorre o caminho inverso até encontrar um estado final, estando então encontrado um \emph{token} válido. Caso o analisador não atinja um estado final, então é gerado um erro léxical. Para melhor identificação do erro lexícal, é impressa a linha e a coluna onde se encontra o mesmo. Assim, necessitamos de mecanismos para obter estas informações.
+A análise lexical é realizada da esquerda para a direita, caracter a caracter, até ao momento em que o autómato atinge um estado morto. Quando este mesmo estado é atingido, o analisador regressa ao último estado final, caso em que é encontrado um \textit{token} válido. Caso o analisador não tenha atingido previamente um estado final, é então gerado um erro lexical. Para melhor identificação do erro lexical, é impressa a linha e a coluna da posição onde começa o \textit{token}. Para este efeito, necessitamos de mecanismos para obter informação da posição.
 
-Para tal, existe uma varíavel com o nome \emph{colNo}, responsável por armazenar a coluna actual, sendo esta variável incrementada quando se verifica uma mudança de lina . Relativamente à linha, obtemos o seu valor actual através da varíavel \emph{yylineno}, já implementada pelo \emph{YACC}.
-
+Para tal, existe uma variável com o nome \textit{colNo}, responsável por armazenar a coluna actual, sendo esta variável incrementada de cada vez que se acaba de processar um \textit{token} válido. Relativamente à linha, obtemos o seu valor actual através da variável \textit{yylineno}, já implementada pelo \textit{YACC}.
 
 
 \subsection{Tratamento dos Comentários}
 
-A linguagem iJava permite a existência de comentários de linha(iniciado por "$\|$") e comentários de bloco(colocados entre "$/* */$").
+A linguagem \textit{iJava} permite a existência de comentários de linha (iniciados por "\textit{//}") e comentários de bloco (colocados entre "\textit{/* */}").
+
+No caso dos comentários de linha, uma simples expressão regular permite manter actualizada a informação de linhas e colunas. No caso dos comentários de bloco, usou-se um estado \textit{COMMENT}, no qual se entra quando se detecta o \textit{token} "\textit{/*}" e do qual se sai quando se detecta o \textit{token} "\textit{*/}". Dentro deste estado, apesar de se ignorar o texto que não representa o final do comentário, actualiza-se a informação de posição, mantendo assim a sua correcção.
 
 \newpage
 
 \section{Análise Sintática}
 
-Após terminada a fase da análise lexical, segue-se a análise sintática. Uma vez que nesta vamos ter em conta as precedências dos operadores, foram feitos alguns ajustes nos tokens detectados. Estas alterções serão explicadas de seguida.
+Após terminada a fase da análise lexical, segue-se a análise sintática. Uma vez que nesta fase é necessário ter em conta as prioridades dos operadores, foram feitos alguns ajustes nos tokens detectados. Estas alterações são explicadas na próxima secção.
 
-\subsection{Alterações na Análise Léxical}
+A ferramenta utilizada, o \textit{YACC}, é um analizador sintático \textit{LALR(1)}. Assim, foi preferida na nossa implementação da gramática recursividade à esquerda, por resultar numa menor utilização da pilha.
 
-Como dito anteriormente, houve necessidade de efectuar algumas alterações à organização dos \emph{tokens} realtivos aos operadores. Estas alterações devem-se à necessidade de termos em conta as precedências dos operadores. Assim, após alterações obtivemos os seguintes tokens relativos aos operadores.
+\subsection{Alterações na Análise Lexical}
+
+Como dito anteriormente, houve necessidade de alterar a organização dos \textit{tokens} relativos aos operadores. Estas alterações devem-se à necessidade de se ter em conta as prioridades dos operadores. Assim, após alterações, obtivemos os seguintes tokens relativos aos operadores.
 
 \begin{itemize}
 	\item \textbf{AND} - \&\&
 	\item \textbf{OR} - $\|$
 	\item \textbf{RELCOMPAR} - $< , >, <= , >=$
-	\item \textbf{EQUALITY} -  $, == , !=$ 
-	\item \textbf{ADDITIVE} - $ , == , != $
+	\item \textbf{EQUALITY} -  $== , !=$ 
+	\item \textbf{ADDITIVE} - $+ , -$
 	\item \textbf{MULTIPLIC} - $* , / , \% $
 \end{itemize}
 
-Para além das alterações acima referidas, foram ainda feitas outras em relação à contagem da linha e da coluna. Uma vez que aquando da mostragem da mensagem de erro sintático, o número da linha e da coluna apresentadas têm de corresponder ao inicio do \emph{token} inválido. Logo, esta informação foi guardada de forma a depois ser acedida no analisador sintático.
+Para além das alterações acima referidas, foram ainda feitas outras em relação à contagem da linha e da coluna. Uma vez que aquando da mostra da mensagem de erro sintático, o número da linha e da coluna apresentadas têm de corresponder ao início do \textit{token} inválido, esta informação foi guardada de forma a poder ser acedida no analisador sintático.
 
 \subsection{Gramática da Linguagem}
 
-A gramática da linguagem \emph{iJava}, apresenta-se de seguida segundo a notação \emph{EBNF}: 
+A gramática da linguagem \textit{iJava}, apresenta-se de seguida segundo a notação \textit{EBNF}: 
 \vspace{0.5cm}
 
 \hspace{-1cm}\vspace{.1cm}Start $\rightarrow$ Program \\ \\
@@ -207,15 +183,15 @@ MethodDecl $\rightarrow$ PUBLIC STATIC ( Type $\mid$ VOID ) ID OCURV [ FormalPar
 \vspace{.5cm}Args $\rightarrow$ Expr { COMMA Expr }\\
 
 
-Após a interpretação da gramática dada, definimos a gramática seguindo a notação do \emph{YACC}. A gramática obtida após definição de precedências e após alterações relativamente à gramática acima, foi a seguinte seguida(todas as alterações e definições de precedências serão abordadas com detalhe nas proximas secções).
+Após a interpretação da gramática dada, definimos a gramática no \textit{YACC}. A gramática obtida após definição de prioridades e após alterações relativamente à gramática acima, foi a seguinte (todas as alterações e definições de precedências serão abordadas com detalhe nas proximas secções).
 
 \vspace{0.7cm}
 
-\lstset{language=C,caption={Gramática obtida segundo a representação do YACC},label=Estruturas,numbers=left,frame=single, breaklines = true}
+\lstset{language=C,caption={Gramática obtida segundo a representação do YACC},label=Estruturas1,numbers=left,frame=single, breaklines = true}
 \begin{lstlisting}
 
 start: CLASS ID '{' decls '}'
-	 | CLASS ID '{' '}'
+     | CLASS ID '{' '}'
 
 decls: decls fielddecl
      | decls methoddecl
@@ -238,7 +214,7 @@ stmtlist: stmtlist statement
         |
 
 vardecl: vardecl type ID idlist ';'
-	   |
+       |
 
 idlist: idlist ',' ID
       |
@@ -259,56 +235,57 @@ statement: '{' stmtlist '}'
          | RETURN ';'         
 
 expr: exprindex
-	| exprnotindex
+    | exprnotindex
 	
 exprindex: ID
-     	 | INTLIT
-     	 | BOOLLIT
-     	 | '(' expr ')'
-     	 | expr DOTLENGTH
-     	 | PARSEINT '(' ID '[' expr ']' ')'
-     	 | ID '(' args ')'
-     	 | ID '(' ')'
+         | INTLIT
+         | BOOLLIT
+         | '(' expr ')'
+         | expr DOTLENGTH
+         | PARSEINT '(' ID '[' expr ']' ')'
+         | ID '(' args ')'
+         | ID '(' ')'
          | exprindex '[' expr ']'
 
 exprnotindex: NEW INT '[' expr ']'
-     		| NEW BOOL '[' expr ']'
-     	 	| '!' expr               %prec UNARY
-     	 	| ADDITIVE expr          %prec UNARY
-     	 	| expr AND expr
-     	 	| expr OR expr
-     	 	| expr RELCOMPAR expr
-     	 	| expr EQUALITY expr
-     	 	| expr ADDITIVE expr
-     	 	| expr MULTIPLIC expr
+            | NEW BOOL '[' expr ']'
+            | '!' expr               %prec UNARY
+            | ADDITIVE expr          %prec UNARY
+            | expr AND expr
+            | expr OR expr
+            | expr RELCOMPAR expr
+            | expr EQUALITY expr
+            | expr ADDITIVE expr
+            | expr MULTIPLIC expr
 
 args: expr argslist
     | expr
  
 argslist: ',' args
 
-   
 \end{lstlisting}
 
 \subsection{Tradução da Gramática dada para o YACC}
 
-Como referido anteriormente, foram necessárias diversas alterações à gramática dada na notação \emph{EBNF}. Nesta sub-secção vamos referenciar essas alterações explicando o seu porquê.
+Como referido anteriormente, foram necessárias diversas alterações à gramática dada na notação \textit{EBNF}. Nesta sub-secção vamos comentar essas alterações explicando a sua razão de ser.
 
 Uma das alterações efectuadas, é relativa à abordagem do que é "opcional"$([\dots])$, que tem "zero ou mais repetições"$(\{\dots\})$ e situações em que temos várias opções.
 
 \begin{itemize}
-	\item Nas situações em que temos símbolos "opciaís", dividimos a regra em duas regras distintas como forma de abrager os dois casos, ou seja, o caso em que tem o simbolo e o caso em que não. Noutros casos, simplesmente consideramos a possiblidade de ter a String vazia aos símbolos poderem ser opcionais.
+	\item Nas situações em que temos símbolos "opcionais", dividimos a regra em duas regras distintas para abrager os dois casos posssíveis, o caso em que tem o símbolo e o caso em que não. Noutros casos, simplesmente considerámos a possiblidade de ter um síbolo não terminal a derivar a cadeia vazia.
 	
-	\item Quando existem "zero ou mais repetições", consideramos a possibilidade da String vazia, sendo ainda adicionada a recursividade de forma a permitir várias repetições da mesma regra.
+	\item Quando existem "zero ou mais repetições", considerámos a possibilidade de ser derivada a cadeia vazia, sendo ainda adicionada recursividade de forma a permitir várias repetições do mesmo símbolo.
 	
-	\item No caso de termos várias opções relativamente ao simbolo, é criada uma nova regra que contempla todas os simbolos possíveis.  
+	\item No caso de termos várias opções relativamente ao símbolo, é criada uma nova regra que contempla todos os símbolos possíveis.  
 \end{itemize} 
 
-Outras alterações efectuadas têm a ver com a definição de precedência de operadores. Apresentamos abaixo as precedências definidas no \emph{YACC}.
+\subsubsection{Prioridade de Operadores}
+
+Outras alterações efectuadas têm a ver com a definição de prioridade de operadores. Apresentamos abaixo as prioridades que definimos no \textit{YACC}.
 
 \newpage 
  
-\lstset{language=C,caption={Precedências},label=Estruturas,frame=single, breaklines = true}
+\lstset{language=C,caption={Prioridades},label=Estruturas2,frame=single, breaklines = true}
 \begin{lstlisting}
  %left OR
  %left AND
@@ -319,5 +296,497 @@ Outras alterações efectuadas têm a ver com a definição de precedência de o
  %right UNARY
  %left '[' DOTLENGTH
 \end{lstlisting}
+
+\vspace{0.5cm}
+
+Segundo o \textit{YACC}, as prioridades definidas mais abaixo, têm maior prioridade do que as definidas acima. Por exemplo, \textit{AND} tem maior prioridade do que \textit{OR} e menor do que \textit{EQUALITY}. 
+
+Estas prioridades representam as prioridades da linguagem \textit{Java}, que são as mesmas que se aplicam na linguagem \textit{iJava}.
+
+\subsubsection{Ambiguidade \textit{if-else}}
+
+Uma ambiguidade muito comum na definição da gramática de uma linguagem está relacionada com o \textit{if-else}. Veja-se o seguinte exemplo:
+
+\vspace{0.3cm}
+\lstset{language=C,label=Estruturas3, caption={}, numbers=none, frame=single, breaklines = true}
+\begin{lstlisting}
+ IF '(' expr ')' IF '(' expr ')' statement ELSE statement  
+\end{lstlisting}
+ 
+\vspace{0.3cm}
+
+Como podemos verficar acima, o " \textit{ELSE statement} " pode estar associado ao \textit{IF} exterior ou ao interior. São então possíveis duas árvores de derivação, existindo portanto uma ambiguidade. Para resolver esta ambiguidade, foram definidas as seguintes prioridades:
+
+\vspace{0.3cm}
+
+\lstset{language=C,label=Estruturas4, caption={}, numbers=none, frame=single, breaklines = true}
+\begin{lstlisting}
+ %nonassoc IFX
+ %nonassoc ELSE   
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+Desta forma, dando maior prioridade à redução do \textit{ELSE}, o \textit{ELSE} é sempre associado ao \textit{IF} mais recente.
+
+\subsubsection{Indexação}
+
+Relativamente à indexação, foram feitas algumas alterações relativamente à gramática inicial, de forma separar as expressões indexáveis das não-indexáveis. Como podemos verificar (ver linhas 46-68), a \textit{expr} pode derivar em \textit{exprindex} e \textit{exprnotindex}.
+
+\begin{itemize}
+	\item Uma vez que a linguagem não permite a existência de arrays \textbf{não unidimensionais}, as regras " \textit{NEW INT [ expr ]} " e " \textit{NEW BOOL [ expr ]} " estão incluídas nas não indexáveis, não sendo assim possível a inicialização de arrays não unidimensionais.
+	
+	\item O operador de indexação tem maior prioridade do que qualquer operador (excepto \textit{DOTLENGTH}, que tem a mesma). Desta forma, nunca será possível indexar uma expressão unária (excepto \textit{DOTLENGTH}) ou binária, pelo que estas são não-indexáveis. 
+	
+	\item Todos os outros tipo de expressões, estão incluídas nas indexáveis.
+\end{itemize}
+
+\subsection{Árvore de Sintaxe Abstracta}
+
+Concluída a definição da grámatica, segue-se então a construção da AST.
+
+\subsubsection{Estruturas de Dados}
+
+Para a construção da AST, foram definidos diversos nós, sendo estes apresentados e analisados detalhadamente de seguida. Optámos por definir um nó para cada regra da gramática, por ser para nós conceptualmente mais fácil visualizar a árvore desta forma.
+
+\lstset{caption={Expressão}}
+\begin{lstlisting}
+ typedef struct _expr
+ {
+     ExprType type;
+     OpType op;
+ 	struct _expr *expr1;
+ 	struct _expr *expr2;
+ 	char *idOrLit;
+ 	ArgsList *argsList;
+ } Expr;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+	\item \textbf{type} - permite identificar o tipo da expressão (Binária, Unária, \textit{ID}, \textit{boolean}, \textit{int}, Chamada de Função, \textit{parseInt}, indexação, \textit{new BOOL[]}, \textit{new INT[]});
+	
+	\item \textbf{op} - permite identificar o operador aplicado na expressão. Estes operadores são aplicados nas expressões binárias, unárias e no caso particular do \textit{.length};
+	
+	\item \textbf{expr1} - esta variável corresponde à expressão à esquerda do operador nas operações binárias, assim como a expressão utilizada nas operações unárias. No caso da indexação, este campo corresponde à expressão a ser indexada. Por fim, no caso das operações do tipo \textit{new BOOL[]}, \textit{new INT[]}, este campo corresponde ao tamanho do array a ser inicializado.
+	
+	\item \textbf{expr2} - no caso das operações binárias, a \textit{expr2} corresponde à expressão à direita do operador. Este campo é utilizada nas expressões do tipo \textit{Indexação}, correspondendo ao índice a ser usado.
+	
+	\item \textbf{idOrLit} - esta variável tem como objectivo armazenar um \textit{ID} da expressão ou um literal;
+	
+	\item \textbf{argsList} - é através desta variável que são guardados os argumentos "passados" quando é feita a chamada de uma função.
+\end{itemize}
+
+\newpage
+
+\lstset{caption={Lista de Argumentos}}
+\begin{lstlisting}
+ typedef struct _argsList ArgsList;
+
+ struct _argsList
+ {
+ 	Expr *expr;
+     struct _argsList *next;
+ };
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+Representa a lista de argumentos a serem passados aquando da chamada de uma função.
+
+\lstset{caption={Statement}}
+\begin{lstlisting}
+ typedef struct _stmt
+ {
+     StmtType type;
+     char *id;
+     Expr *expr1;
+     Expr *expr2;
+     struct _stmt *stmt1;
+     struct _stmt *stmt2;
+     struct _stmtList *stmtList;
+ } Stmt;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item \textbf{type} - permite distinguir os vários tipos de statements (\textit{compound statement}, \textit{if-else}, \textit{return}, \textit{while}, \textit{print}, \textit{store}, \textit{store array});
+    
+    \item \textbf{id} - esta variável permite guardar o \emph{id} da variável a que é atribuida uma expressão, no \emph{store} e no \emph{storearray};
+    
+    \item \textbf{expr1} - é utilizada no caso de existir apenas uma expressão na regra. No caso de existirem duas regras, a regra mais à exquerda é armazenada neste campo.
+    
+    \item \textbf{expr2} - apenas é utilizada no caso de existirem duas expressões na regra, correspondendo à expressão mais à direita;
+    
+    \item \textbf{stmtList} - caso o \emph{statement} seja do tipo \emph{compound statement}, então todas as \emph{statements} são adicionadas a esta lista de \emph{statments}.
+\end{itemize}
+
+\lstset{caption={Lista de Statements}}
+\begin{lstlisting}
+ typedef struct _stmtList
+ {
+     Stmt *stmt;
+     struct _stmtList *next;
+ } StmtList;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+Esta lista é utilizada como estrutura auxiliar de \textit{compound statements}.
+
+\lstset{caption={Lista de IDs}}
+\begin{lstlisting}
+ typedef struct _idList
+ {
+ 	char *id;
+ 	struct _idList *next;
+ } IDList;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+Permite armazenar os id's das variáveis quando estas são declaradas em formato de lista definindo o tipo delas uma única vez.
+
+\lstset{caption={Declaração de Variável}}
+\begin{lstlisting}
+ typedef struct _varDecl
+ {
+     Type type;
+	 int isStatic;
+	 IDList *idList;
+ } VarDecl;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item \textbf{type} - corresponde ao tipo da variável a ser declarada(\textit{int, bool, int[], bool[]});
+    
+    \item \textbf{isStatic} - identifica a variável como sendo estática ou não;
+    
+    \item \textbf{idList} - uma vez que podem ser declaradas várias variáveis do mesmo tipo definindo o tipo apenas uma vez, é usada uma estrutura auxiliar para manter a lista dos \textit{ID}s das variáveis.
+\end{itemize}
+
+\lstset{caption={Lista de Declarações}}
+\begin{lstlisting}
+ typedef struct _varDeclList
+ {
+  	 VarDecl *varDecl;
+	 struct _varDeclList *next; 
+ } VarDeclList;
+\end{lstlisting}
+
+Estrutura auxiliar usada para manter todas as declarações de variáveis locais de um método.
+
+\vspace{0.3cm}
+
+\lstset{caption={Lista de Parâmetros}}
+\begin{lstlisting}
+ typedef struct _paramList
+ {
+     Type type;
+ 	char *id;
+ 	struct _paramList *next;
+ } ParamList;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item \textbf{type} - representa o tipo do parâmetro;
+    \item \textbf{id} - armazena o \textit{id} do parâmetro;
+    \item \textbf{next} - ponteiro para o parâmetro seguinte.
+\end{itemize}
+
+\lstset{caption={Declaração de Método}}
+\begin{lstlisting}
+ typedef struct _methodDecl
+ {
+     Type type;
+ 	char *id;
+ 	ParamList *paramList;
+ 	VarDeclList *varDeclList;
+ 	StmtList *stmtList;
+ } MethodDecl;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item \textbf{type} - representa o tipo do valor de retorno da função. Para além dos tipos de variáveis é ainda possível retornar \textit{void};
+    \item \textbf{id} - armazena o nome do método;
+    \item \textbf{paramList} - contém a lista de parâmetros recebidos pela função;
+    \item \textbf{varDeclList} - lista de declarações de variáveis locais à função;
+    \item \textbf{stmtList} - lista de \textit{statments da função}.
+\end{itemize}
+
+\lstset{caption={Lista de Declarações}}
+\begin{lstlisting}
+ typedef struct _declList
+ {
+     DeclType type;
+ 	union
+ 	{
+ 		VarDecl *varDecl;
+ 		MethodDecl *methodDecl;
+ 	};
+     struct _declList *next;
+ } DeclList;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item \textbf{type} - permite identificar se é a declaração de um método ou de uma variável global;
+    \item \textbf{varDecl} - caso se trate de uma variável global, então é criado um novo nó do tipo \textit{Variable Declaration};
+    \item \textbf{methodDecl} - caso se trate da declaração de um método, então é criado um novo nó do tipo \textit{Method Declaration}
+\end{itemize}
+
+\lstset{caption={Classe}}
+\begin{lstlisting}
+ typedef struct _class
+ {
+ 	char *id;
+ 	DeclList *declList;
+ } Class;
+\end{lstlisting}
+
+\vspace{0.3cm}
+
+Esta estrutura armazena o nome da classe e a lista de declarações.
+
+\subsubsection{Construção da Árvore}
+
+Após termos definido as estrutura de dados acima, seguem-se os procedimentos utilizados para efectuar novas inserções na AST.
+
+\lstset{caption={Funções utilizadas na construção da AST}}
+\begin{lstlisting}
+ Class* insertClass(char*, DeclList*);
+ 
+ DeclList* insertDecl(DeclType, void*, DeclList*);
+ 
+ VarDecl* insertFieldDecl(Type, char*, IDList*);
+ 
+ VarDeclList* insertVarDecl(VarDeclList*, Type, char*, IDList*);
+ 
+ IDList* insertID(char*, IDList*);
+ 
+ StmtList* insertStmtList(Stmt*, StmtList*);
+ 
+ Stmt* insertStmt(StmtType, char*, Expr*, Expr*, Stmt*, Stmt*,   StmtList*);
+ 
+ ParamList* insertFormalParam(Type, char*, ParamList*, int);
+ 
+ MethodDecl* insertMethodDecl(Type, char*, ParamList*, VarDeclList*, StmtList*);
+ 
+ Expr* insertExpr(ExprType, char*, Expr*, Expr*, char*, ArgsList*);
+ 
+ ArgsList* insertArg(Expr*, ArgsList*);
+\end{lstlisting}
+\vspace{0.3cm}
+
+\section{Análise Semântica}
+
+Concluída a construção da \textit{AST} e a identificação de erros sintáticos, segue-se a análise semântica. Para tal, foi construída uma tabela de símbolos global e uma tabela local para cada método declarado.
+
+\subsection{Arquitetura da Tabela de Símbolos}
+
+Segue-se abaixo um esquema da estrutura da tabela de simbolos.
+
+\begin{figure}[h!]
+    \centering
+    \centerline{\includegraphics[keepaspectratio=true, width=1.3\textwidth]{table.jpg}}
+    \caption{Esquema tabela de símbolos.}
+\end{figure}
+
+Como se pode verificar, a tabela é representada através de uma lista ligada em que os nós representam variáveis globais e métodos. Cada método contém um ponteiro para uma nova lista, a sua tabela local, que contém todos os símbolos locais a esse método. Os argumentos dos métodos aparecem no ínicio desta lista (com a \textit{flag} \textit{isParam} a 1).
+
+De seguida, apresentam-se as estruturas de dados utilizadas para representar a tabela de símbolos.
+
+\lstset{caption={Estrutura da Tabela de Símbolos}}
+\begin{lstlisting}
+ typedef struct _methodTableEntry
+ {
+     char* id;
+     Type type;
+     int isParam;
+     struct _methodTableEntry* next;
+ } MethodTableEntry;
+
+ typedef struct _methodTable
+ {
+     struct _classTable* broaderTable;
+     MethodTableEntry* entries;
+
+ } MethodTable;
+
+ typedef struct _classTableEntry
+ {
+     char* id;
+     Type type;
+     MethodTable* methodTable;
+     struct _classTableEntry* next;
+ } ClassTableEntry;
+
+ typedef struct _classTable
+ {
+     char* id;
+     ClassTableEntry* entries;
+ } ClassTable;
+\end{lstlisting}
+
+Os métodos utilizados na construção da tabela de símbolos foram os que se apresentam na listagem seguinte.
+
+\lstset{caption={Métodos para Construção da Tabela de Símbolos}}
+\begin{lstlisting}
+ClassTable* buildSymbolsTables(Class*);
+ClassTableEntry* newVarEntries(VarDecl*, ClassTableEntry*);
+void newMethodEntry(MethodDecl*, ClassTableEntry*, ClassTable*);
+void newMethodTable(MethodTable*, ParamList*, VarDeclList*);
+\end{lstlisting}
+
+\begin{itemize}
+    \item O método \textit{buildSymbolsTables()} é o método que é chamado no \textit{YACC} após a construção da \textit{AST} para dar início à construção da tabela de símbolos.
+    \item \textit{newVarEntries} é o método que, a partir de uma lista de variáveis globais em que o tipo apenas é definido uma vez, as coloca na tabela de símbolos da classe.
+    \item O método \textit{newMethodEntry()} é responsável por introduzir na tabela de símbolos da classe toda a informação referente ao método, como o seu nome e tipo de retorno.
+    \item \textit{newMethodTable()} é o método que preenche a tabela de símbolos local a um método com a informação sobre os seus parâmetros e variáveis locais.
+\end{itemize}
+
+\subsection{Detecção de Erros}
+
+Após a construção da tabela de símbolos, segue-se a deteção de erros semânticos. Apresentam-se de seguida os possíveis erros semânticos:
+
+\lstset{caption={Estrutura da Tabela de Símbolos}, numbers=left}
+\begin{lstlisting}
+ Cannot find symbol %s
+ Incompatible type of argument %d in call to method %s (got % required %s)
+ Incompatible type in assignment to %s (got %s, required %s)
+ Incompatible type in assignment to %s[] (got %s, required %s)
+ Incompatible type in %s statement (got %s, required %s)
+ Incompatible type in %s statement (got %s, required %s or %s)
+ Invalid literal %s
+ Operator %s cannot be applied to type %s
+ Operator %s cannot be applied to types %s, %s
+ Symbol %s already defined
+\end{lstlisting}
+
+\begin{itemize}
+    \item \textbf{Erro 1} - A verificação da declaração de uma variável ou método já definidos é feita durante a construção da tabela de símbolos. Assim, antes da inserção de um novo símbolo na tabela, verifica-se se o símbolo já foi previamente definido. Note-se que, a linguagem permite a existência de um método e de uma várivel local com o mesmo nome, não sendo por isso gerado nenhum erro semântico;
+    
+    \item \textbf{Erro 2} - A comparação entre os tipos de parâmetros recebidos por um método e os argumentos passados na chamada deste mesmo método, é feita obtendo da tabela de símbolos local ao método os tipos recebidos pela função, comparando-os com os argumentos passados, obtidos da \textit{AST};
+    
+    \item \textbf{Erro 3, 4} - A verificação da correcção de tipos nas atribuições é feita através da comparação do tipo devolvido pela expressão correspondente ao valor a ser atribuído e o tipo da variável à qual estamos a fazer a atribuição;
+    
+    \item \textbf{Erro 5} - Este erro é gerado quando, por exemplo, o tipo da expressão no \textit{return} é diferente do tipo de retorno do método. Para além disto, no caso de termos um \textit{if} ou um \textit{while} cuja expressão condicional não é do tipo boolean, é também gerado um erro semântico deste tipo;
+    
+    \item \textbf{Erro 6} - Nos casos em que é chamado o \textit{System.out.println} com váriaveis cujo tipo não é \textit{Integer} nem \textit{Boolean}, então é gerado um erro indicando que o operador apenas aceita parâmetros deste tipo.
+    
+    \item \textbf{Erro 7} - Caso o literal não seja um octal (começado por "0"), hexadecimal (começado por "0x") ou decimal (os restantes casos), é então gerado um erro deste tipo;
+    
+    \item \textbf{Erro 8} 
+    
+    \begin{itemize}
+        \item Quando um operador unário ou o \textit{.length} é aplicado sobre um tipo sobre o qual essa operação não é valida. Por exemplo, o operador unário \textit{not}, apenas pode ser aplicado sobre expressões do tipo \textit{boolean}. Igualmente, o \textit{.length} apenas pode ser usado em \textit{arrays};
+        
+        \item Na inicialização de \textit{arrays}, caso a expressão que indica o tamanho do \textit{array} seja de um tipo diferente de \textit{integer}, é gerado um erro semântico.
+    \end{itemize}
+    
+    
+    \item \textbf{Erro 9}
+    
+    \begin{itemize}
+    
+        \item No caso de \textit{store array}, o erro pode ser análogo ao da indexação (Ver abaixo);
+        
+        \item Quando os operadores "+", "-", "*", "/", "\%", "<", ">", "<=", ">=" são aplicados a tipos diferentes de \textit{integer};
+        
+        \item Quando os operdores "!=" e "==" são aplicados a tipos diferentes;
+         
+        \item Quando os operadores "$\&\&$" e "$||$" são aplicados a tipos diferentes de \textit{Boolean} 
+        
+        \item Caso o \textit{Integer.parseInt} não seja aplicado a um \textit{array} de \textit{Strings} indexado por um \emph{integer}, então é gerado um erro deste tipo;
+        
+        \item É gerado um erro deste tipo quando é feita a indexação a um tipo diferente de \textit{int[]} ou \textit{bool[]}. Igualmente, caso a expressão de indexação não seja do tipo inteiro é gerado um erro semântico desta natureza;
+    \end{itemize}
+    
+\end{itemize}
+
+\section{Geração de Código}
+
+A última fase, que se segue à fase semântica, é a geração de código. No âmbito do nosso projecto, foi implementada a geração de código intermédio \textit{LLVM}. Após a geração de um ficheiro \textit{.ll}, pode então interpretar-se com o comando \textit{lli} ou compilar com o comando \textit{llc} seguido de um qualquer compilador de \textit{Assembly} o código gerado pelo nosso compilador.
+
+Nesta secção serão apenas mencionadas as funcionalidades mais complexas, para manter a brevidade deste relatório. As restantes funcionalidades, por serem comparativamente triviais, foram omitidas.
+
+\subsection{Ifs e Whiles}
+
+Para a implementação destas estruturas de controlo foram utilizadas \textit{named labels}, com o cuidado de usar pontos na sua nomenclatura, para evitar conflitos com identificadores do programa a ser compilado.
+
+O \textit{if-else} consiste em 3 \textit{labels}, uma para o \textit{then}, uma para o \textit{else} e uma que representa o fim do \textit{if-else}. A \textit{then}, contém o código que deve ser executado se a condição for verdadeira, sendo que na \textit{else} se encontra o código que deve ser executado se esta for falsa. A \textit{label} que representa o fim do \textit{if-else} é para onde qualquer um dos segmentos anteriores salta no final da sua execução. Esta \textit{label} precede o código que se segue a esta estrutura de controlo de fluxo.
+
+O \textit{while} é muito análogo ao \textit{if-else}, tendo também 3 \textit{labels}. A primeira é o início da estrutura, onde se encontra a condição de paragem. Caso esta condição seja verdadeira, o programa executa o que se encontra na segunda \textit{label}, \textit{do}, voltando no final deste segmento à \textit{label start}. Caso a condição de paragem seja falsa, a execução salta para a \textit{label end}, que precede o código que se segue ao \textit{while}.
+
+\subsection{Returns}
+
+Como não é efectuada qualquer análise da presença de \textit{returns} numa função, ou da existência de \textit{returns} em todos os ramos de execução de uma função, foi necessário encontrar uma forma de nos certificarmos que qualquer função retorna, independentemente da existência ou não de \textit{returns explícitos}.
+
+Para solucionar este problema, todos os métodos possuem um return por omissão, colocado no final da função. Este retorna 0 no caso de o tipo de retorno ser \textit{inteiro} ou \textit{boolean}, \textit{null} no caso de ser um ponteiro ou uma estrutura com o primeiro campo a 0 e o segundo a \textit{null} no caso de ser um \textit{array}.
+
+\subsection{ParseInt}
+
+Para o \textit{Integer.parseInt}, foi usada a função \textit{atoi()} da biblioteca de \textit{C}, através da \textit{API} de chamada deste tipo de funções a partir de \textit{LLVM}.
+
+\subsection{Prints}
+
+Para a impressão foi necessário definir \textit{strings} auxiliares para serem usadas na função \textit{printf()} da biblioteca de \textit{C}.
+
+No caso de inteiros, foi utilizada a \textit{string} \textit{"\%d\textbackslash n"}, sendo passada essa \textit{string} como \textit{format string} da função \textit{printf()} e o inteiro a imprimir como segundo argumento dessa mesma função.
+
+No caso de \textit{booleans}, utilizou-se um \textit{array} com a string \textit{"false\textbackslash n"} na primeira posição e \textit{"true \textbackslash n"} na segunda. Desta forma, e tendo em conta que em \textit{LLVM} \textit{false} $= 0$ e \textit{true} $= 1$, podemos usar o valor que queremos imprimir como índice do \textit{array} para obter a \textit{format string} a passar à função \textit{printf()}.
+
+\subsection{Short Circuiting}
+
+Inicialmente tentámos implementar esta funcionalidade com recurso a nós \textit{phi} da representação intermédia \textit{LLVM}. No entanto, após problemas com a correcta indicação das \textit{labels} que precedem a instrução \textit{phi} desistimos desta abordagem.
+
+No entanto, essa abordagem seria correcta e mais eficiente em termos de memórida alocada na stack, não fazendo uso de nenhuma memória deste tipo. Chegámos tardiamente à conclusão de que, com uma \textit{label} adicional que representasse sempre a saída de qualquer código que fosse executado apenas caso não existisse \textit{short circuiting}, poderiamos ter solucionado este problema.
+
+A nossa abordagem implementada foi utilizar uma estrutura de controlo de fluxo semelhante a um \textit{if}, mas que necessita de recorrer a memória da pilha.
+
+\lstset{caption={Short Circuiting em ANDs}, numbers=none}
+\begin{lstlisting}
+ a && b
+ 
+ res = a;
+ if(a)
+    res = b;
+\end{lstlisting}
+
+\lstset{caption={Short Circuiting em ORs}, numbers=none}
+\begin{lstlisting}
+ a || b
+ 
+ res = a;
+ if(!a)
+    res = b;
+\end{lstlisting}
+
+\subsection{Arrays e .length}
+
+Para poder ter a funcionalidade de \textit{Java} existente no operador \textit{.length}, implementámos os \textit{arrays} como sendo estruturas, em que na primeira posição se encontra o tamanho do vector e na segunda o ponteiro em si.
+
+Desta forma, o operador \textit{.length} consiste apenas na obtenção do valor guardado na primeira posição da estrutura. Este valor deve ser actualizado sempre que existir um \textit{new} com o valor correcto do novo tamanho do array, sendo inicializado a 0 aquando da declaração da variável.
+
+A indexação de um array continua a ser uma simples indexação, em que apenas se deve indexar o valor na segunda posição da estrutura.
+
+\subsection{Inicialização de Arrays}
+
+Usando a função \textit{calloc} de \textit{C} forçamos a inicialização de \textit{arrays} de inteiros a 0 e de \textit{arrays} de \textit{booleans} a \textit{false}, tal como acontece em \textit{Java}.
+
+\section{Possíveis Melhorias}
+
+Uma das possíveis melhorias que poderiamos implementar seria a libertação de toda a memória alocada na \textit{heap} no processo de compilação de um qualquer programa. Apesar de termos o código já estruturado para que, em qualquer cenário de saída do programa, não tivémos, infelizmente, tempo para implementar esta correcta libertação.
+
+Outra melhoria digna de ser mencionada é o facto de não utilizarmos \textit{unions} nos nós da \textit{AST} em casos em que o uso destas estruturas pouparia claramente espaço. A razão pela qual não implementámos desta forma os nós da \textit{AST} foi não complicar em demasia as funções de criação de nós da \textit{AST}, que nesse caso teriam de ter sido implementadas com cuidado para não sobrepor campos importantes ao inicializar campos irrelevantes para o tipo de nó em questão.
 
 \end{document}
