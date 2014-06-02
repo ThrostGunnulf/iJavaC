@@ -615,3 +615,4 @@ void getOpLLVM(char* llvmOp, OpType opType)
 {
     sprintf(llvmOp, "%s", llvmOps[opType]);
 }
+
