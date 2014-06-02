@@ -17,6 +17,8 @@ typedef struct _ExprRet
 extern Class* myProgram;
 extern ClassTable* symbolsTable;
 extern MethodTable* currentLocalTable;
+
+char prevLabel[100];
 char* argCountName;
 Type curFunctionType;
 char* curFunctionName;
@@ -200,19 +202,19 @@ void genStmt(Stmt* stmt)
         int thisIfElseNumber = ifNumber++;
 
         int compVarNumber = genExpr(stmt->expr1).tempVarNum;
-        printf("\tbr i1 %%%d, label %%ifthen%d, label %%ifelse%d\n\n", compVarNumber, thisIfElseNumber, thisIfElseNumber);
+        printf("\tbr i1 %%%d, label %%if.then%d, label %%if.else%d\n\n", compVarNumber, thisIfElseNumber, thisIfElseNumber);
 
-        printf("ifthen%d:\n", thisIfElseNumber);
+        printf("if.then%d:\n", thisIfElseNumber);
         if(stmt->stmt1 != NULL)
             genStmt(stmt->stmt1);
-        printf("\tbr label %%ifend%d\n\n", thisIfElseNumber);
+        printf("\tbr label %%if.end%d\n\n", thisIfElseNumber);
 
-        printf("ifelse%d:\n", thisIfElseNumber);
+        printf("if.else%d:\n", thisIfElseNumber);
         if(stmt->stmt2 != NULL)
             genStmt(stmt->stmt2);
-        printf("\tbr label %%ifend%d\n\n", thisIfElseNumber);
+        printf("\tbr label %%if.end%d\n\n", thisIfElseNumber);
 
-        printf("ifend%d:\n", thisIfElseNumber);
+        printf("if.end%d:\n", thisIfElseNumber);
     }
     else if(stmt->type == RETURN_T)
     {
@@ -238,17 +240,17 @@ void genStmt(Stmt* stmt)
     {
         int thisWhileNum = whileNumber++;
 
-        printf("\tbr label %%whilestart%d\n\n", thisWhileNum);
-        printf("whilestart%d:\n", thisWhileNum);
+        printf("\tbr label %%while.start%d\n\n", thisWhileNum);
+        printf("while.start%d:\n", thisWhileNum);
         int exprVarNumber = genExpr(stmt->expr1).tempVarNum;
-        printf("\tbr i1 %%%d, label %%whiledo%d, label %%whileend%d\n\n", exprVarNumber, thisWhileNum, thisWhileNum);
+        printf("\tbr i1 %%%d, label %%while.do%d, label %%while.end%d\n\n", exprVarNumber, thisWhileNum, thisWhileNum);
 
-        printf("whiledo%d:\n", thisWhileNum);
+        printf("while.do%d:\n", thisWhileNum);
         if(stmt->stmt1 != NULL)
             genStmt(stmt->stmt1);
-        printf("\tbr label %%whilestart%d\n", thisWhileNum);
+        printf("\tbr label %%while.start%d\n", thisWhileNum);
 
-        printf("\nwhileend%d:\n", thisWhileNum);
+        printf("\nwhile.end%d:\n", thisWhileNum);
     }
     else if(stmt->type == PRINT_T)
     {
@@ -349,19 +351,24 @@ ExprRet genExpr(Expr* expr)
         {
             int thisAndNumber = andNumber++;
 
-            printf("\tbr label %%andstart%d\n\n", thisAndNumber);
-            printf("andstart%d:\n", thisAndNumber);
+            //res = a
+            int resVarNumber = varNumber++;
+            printf("\t%%%d = alloca i1\n", resVarNumber);
+            int leftExprIdNum = genExpr(expr->expr1).tempVarNum;
+            printf("\tstore i1 %%%d, i1* %%%d\n", leftExprIdNum, resVarNumber);
 
-            leftExprId = genExpr(expr->expr1);
-            printf("\t%%%d = icmp eq i1 0, %%%d\n", varNumber++, leftExprId.tempVarNum);
-            printf("\tbr i1 %%%d, label %%andend%d, label %%anddo%d\n", varNumber-1, thisAndNumber, thisAndNumber);
+            //if(a)
+            printf("\t%%%d = icmp eq i1 1, %%%d\n", varNumber++, leftExprIdNum);
+            printf("\tbr i1 %%%d, label %%and.do%d, label %%and.end%d\n\n", varNumber -1, thisAndNumber, thisAndNumber);
 
-            printf("anddo%d:\n", thisAndNumber);
-            rightExprId = genExpr(expr->expr2);
-            printf("\tbr label %%andend%d\n\n", thisAndNumber);
+            //res = a
+            printf("and.do%d:\n", thisAndNumber);
+            int rightExprIdNum = genExpr(expr->expr2).tempVarNum;
+            printf("\tstore i1 %%%d, i1* %%%d\n", rightExprIdNum, resVarNumber);
+            printf("\tbr label %%and.end%d\n\n", thisAndNumber);
 
-            printf("andend%d:\n", thisAndNumber);
-            printf("\t%%%d = phi i1 [ false, %%andstart%d ], [ %%%d, %%anddo%d ]\n", varNumber++, thisAndNumber, rightExprId.tempVarNum, thisAndNumber);
+            printf("and.end%d:", thisAndNumber);
+            printf("%%%d = load i1* %%%d\n", varNumber++, resVarNumber);
 
             returnValue.tempVarNum = varNumber -1;
             returnValue.type = BOOL_T;
@@ -370,19 +377,24 @@ ExprRet genExpr(Expr* expr)
         {
             int thisOrNumber = orNumber++;
 
-            printf("\tbr label %%orstart%d\n\n", thisOrNumber);
-            printf("orstart%d:\n", thisOrNumber);
+            //res = a
+            int resVarNumber = varNumber++;
+            printf("\t%%%d = alloca i1\n", resVarNumber);
+            int leftExprIdNum = genExpr(expr->expr1).tempVarNum;
+            printf("\tstore i1 %%%d, i1* %%%d\n", leftExprIdNum, resVarNumber);
 
-            leftExprId = genExpr(expr->expr1);
-            printf("\t%%%d = icmp eq i1 1, %%%d\n", varNumber++, leftExprId.tempVarNum);
-            printf("\tbr i1 %%%d, label %%orend%d, label %%ordo%d\n", varNumber-1, thisOrNumber, thisOrNumber);
+            //if(!a)
+            printf("\t%%%d = icmp eq i1 0, %%%d\n", varNumber++, leftExprIdNum);
+            printf("\tbr i1 %%%d, label %%or.do%d, label %%or.end%d\n\n", varNumber -1, thisOrNumber, thisOrNumber);
 
-            printf("ordo%d:\n", thisOrNumber);
-            rightExprId = genExpr(expr->expr2);
-            printf("\tbr label %%orend%d\n\n", thisOrNumber);
+            //res = a
+            printf("or.do%d:\n", thisOrNumber);
+            int rightExprIdNum = genExpr(expr->expr2).tempVarNum;
+            printf("\tstore i1 %%%d, i1* %%%d\n", rightExprIdNum, resVarNumber);
+            printf("\tbr label %%or.end%d\n\n", thisOrNumber);
 
-            printf("orend%d:\n", thisOrNumber);
-            printf("\t%%%d = phi i1 [ true, %%orstart%d ], [ %%%d, %%ordo%d ]\n", varNumber++, thisOrNumber, rightExprId.tempVarNum, thisOrNumber);
+            printf("or.end%d:", thisOrNumber);
+            printf("%%%d = load i1* %%%d\n", varNumber++, resVarNumber);
 
             returnValue.tempVarNum = varNumber -1;
             returnValue.type = BOOL_T;
