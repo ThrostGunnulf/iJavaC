@@ -32,6 +32,8 @@
 \usepackage{float}
 \usepackage{makeidx}
 
+\usepackage[margin=1.3in]{geometry}
+
 \usepackage{graphicx}
 \setlength{\parindent}{1cm}
 
@@ -156,14 +158,166 @@ A linguagem iJava permite a existência de comentários de linha(iniciado por "$
 
 \newpage
 
-\section{Análise Semântica}
+\section{Análise Sintática}
 
-Nesta secção 
+Após terminada a fase da análise lexical, segue-se a análise sintática. Uma vez que nesta vamos ter em conta as precedências dos operadores, foram feitos alguns ajustes nos tokens detectados. Estas alterções serão explicadas de seguida.
 
-\subsection{title}
+\subsection{Alterações na Análise Léxical}
+
+Como dito anteriormente, houve necessidade de efectuar algumas alterações à organização dos \emph{tokens} realtivos aos operadores. Estas alterações devem-se à necessidade de termos em conta as precedências dos operadores. Assim, após alterações obtivemos os seguintes tokens relativos aos operadores.
+
+\begin{itemize}
+	\item \textbf{AND} - \&\&
+	\item \textbf{OR} - $\|$
+	\item \textbf{RELCOMPAR} - $< , >, <= , >=$
+	\item \textbf{EQUALITY} -  $, == , !=$ 
+	\item \textbf{ADDITIVE} - $ , == , != $
+	\item \textbf{MULTIPLIC} - $* , / , \% $
+\end{itemize}
+
+Para além das alterações acima referidas, foram ainda feitas outras em relação à contagem da linha e da coluna. Uma vez que aquando da mostragem da mensagem de erro sintático, o número da linha e da coluna apresentadas têm de corresponder ao inicio do \emph{token} inválido. Logo, esta informação foi guardada de forma a depois ser acedida no analisador sintático.
+
+\subsection{Gramática da Linguagem}
+
+A gramática da linguagem \emph{iJava}, apresenta-se de seguida segundo a notação \emph{EBNF}: 
+\vspace{0.5cm}
+
+\hspace{-1cm}\vspace{.1cm}Start $\rightarrow$ Program \\ \\
+\vspace{.5cm}Program $\rightarrow$ CLASS ID OBRACE { FieldDecl $\mid$ MethodDecl } CBRACE\\
+\vspace{.5cm}FieldDecl $\rightarrow$ STATIC VarDecl\\
+MethodDecl $\rightarrow$ PUBLIC STATIC ( Type $\mid$ VOID ) ID OCURV [ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE\\ \\
+\vspace{.5cm}FormalParams $\rightarrow$ Type ID { COMMA Type ID }\\
+\vspace{.5cm}FormalParams $\rightarrow$ STRING OSQUARE CSQUARE ID\\
+\vspace{.5cm}VarDecl $\rightarrow$ Type ID { COMMA ID } SEMIC\\
+\vspace{.5cm}Type $\rightarrow$ ( INT $\mid$ BOOL ) [ OSQUARE CSQUARE ]\\
+\vspace{.5cm}Statement $\rightarrow$ OBRACE { Statement } CBRACE\\
+\vspace{.5cm}Statement $\rightarrow$ IF OCURV Expr CCURV Statement [ ELSE Statement ]\\
+\vspace{.5cm}Statement $\rightarrow$ WHILE OCURV Expr CCURV Statement\\
+\vspace{.5cm}Statement $\rightarrow$ PRINT OCURV Expr CCURV SEMIC\\
+\vspace{.5cm}Statement $\rightarrow$ ID [ OSQUARE Expr CSQUARE ] ASSIGN Expr SEMIC\\
+\vspace{.5cm}Statement $\rightarrow$ RETURN [ Expr ] SEMIC\\
+\vspace{.5cm}Expr $\rightarrow$ Expr ( OP1 $\mid$ OP2 $\mid$ OP3 $\mid$ OP4 ) Expr\\
+\vspace{.5cm}Expr $\rightarrow$ Expr OSQUARE Expr CSQUARE\\
+\vspace{.5cm}Expr $\rightarrow$ ID $\mid$ INTLIT $\mid$ BOOLLIT\\
+\vspace{.5cm}Expr $\rightarrow$ NEW ( INT $\mid$ BOOL ) OSQUARE Expr CSQUARE\\
+\vspace{.5cm}Expr $\rightarrow$ OCURV Expr CCURV\\
+\vspace{.5cm}Expr $\rightarrow$ Expr DOTLENGTH $\mid$ ( OP3 $\mid$ NOT ) Expr\\
+\vspace{.5cm}Expr $\rightarrow$ PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV\\
+\vspace{.5cm}Expr $\rightarrow$ ID OCURV [ Args ] CCURV\\
+\vspace{.5cm}Args $\rightarrow$ Expr { COMMA Expr }\\
+
+
+Após a interpretação da gramática dada, definimos a gramática seguindo a notação do \emph{YACC}. A gramática obtida após definição de precedências e após alterações relativamente à gramática acima, foi a seguinte seguida(todas as alterações e definições de precedências serão abordadas com detalhe nas proximas secções).
+
+\vspace{0.7cm}
+
+\lstset{language=C,caption={Gramática obtida segundo a representação do YACC},label=Estruturas,numbers=left,frame=single, breaklines = true}
+\begin{lstlisting}
+
+start: CLASS ID '{' decls '}'
+	 | CLASS ID '{' '}'
+
+decls: decls fielddecl
+     | decls methoddecl
+
+fielddecl: STATIC type ID idlist ';'
+
+methoddecl: PUBLIC STATIC methodtype ID '(' formalparams ')' '{' vardecl stmtlist '}'
+
+methodtype: type 
+          | VOID
+          
+formalparams: type ID formalparamslist
+            | STRING '[' ']' ID
+            |
+
+formalparamslist: formalparamslist ',' type ID   
+                |
+
+stmtlist: stmtlist statement
+        |
+
+vardecl: vardecl type ID idlist ';'
+	   |
+
+idlist: idlist ',' ID
+      |
+
+type: INT '[' ']'
+    | BOOL '[' ']'
+    | INT
+    | BOOL
+
+statement: '{' stmtlist '}'
+         | IF '(' expr ')' statement ELSE statement  %prec ELSE
+         | IF '(' expr ')' statement    %prec IFX   
+         | WHILE '(' expr ')' statement
+         | PRINT '(' expr ')' ';'
+         | ID '[' expr ']' '=' expr ';' 
+         | ID '=' expr ';'
+         | RETURN expr ';'
+         | RETURN ';'         
+
+expr: exprindex
+	| exprnotindex
+	
+exprindex: ID
+     	 | INTLIT
+     	 | BOOLLIT
+     	 | '(' expr ')'
+     	 | expr DOTLENGTH
+     	 | PARSEINT '(' ID '[' expr ']' ')'
+     	 | ID '(' args ')'
+     	 | ID '(' ')'
+         | exprindex '[' expr ']'
+
+exprnotindex: NEW INT '[' expr ']'
+     		| NEW BOOL '[' expr ']'
+     	 	| '!' expr               %prec UNARY
+     	 	| ADDITIVE expr          %prec UNARY
+     	 	| expr AND expr
+     	 	| expr OR expr
+     	 	| expr RELCOMPAR expr
+     	 	| expr EQUALITY expr
+     	 	| expr ADDITIVE expr
+     	 	| expr MULTIPLIC expr
+
+args: expr argslist
+    | expr
+ 
+argslist: ',' args
+
    
+\end{lstlisting}
 
+\subsection{Tradução da Gramática dada para o YACC}
 
+Como referido anteriormente, foram necessárias diversas alterações à gramática dada na notação \emph{EBNF}. Nesta sub-secção vamos referenciar essas alterações explicando o seu porquê.
 
+Uma das alterações efectuadas, é relativa à abordagem do que é "opcional"$([\dots])$, que tem "zero ou mais repetições"$(\{\dots\})$ e situações em que temos várias opções.
+
+\begin{itemize}
+	\item Nas situações em que temos símbolos "opciaís", dividimos a regra em duas regras distintas como forma de abrager os dois casos, ou seja, o caso em que tem o simbolo e o caso em que não. Noutros casos, simplesmente consideramos a possiblidade de ter a String vazia aos símbolos poderem ser opcionais.
+	
+	\item Quando existem "zero ou mais repetições", consideramos a possibilidade da String vazia, sendo ainda adicionada a recursividade de forma a permitir várias repetições da mesma regra.
+	
+	\item No caso de termos várias opções relativamente ao simbolo, é criada uma nova regra que contempla todas os simbolos possíveis.  
+\end{itemize} 
+
+Outras alterações efectuadas têm a ver com a definição de precedência de operadores. Apresentamos abaixo as precedências definidas no \emph{YACC}.
+
+\newpage 
+ 
+\lstset{language=C,caption={Precedências},label=Estruturas,frame=single, breaklines = true}
+\begin{lstlisting}
+ %left OR
+ %left AND
+ %left EQUALITY
+ %left RELCOMPAR
+ %left ADDITIVE
+ %left MULTIPLIC
+ %right UNARY
+ %left '[' DOTLENGTH
+\end{lstlisting}
 
 \end{document}
